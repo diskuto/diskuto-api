@@ -1,6 +1,6 @@
 [package]
-name = "feoblog"
-version = "0.7.0-rc8"
+name = "diskuto-api"
+version = "0.8.0-rc1"
 authors = ["Cody Casterline <cody.casterline@gmail.com>"]
 edition = "2018"
 

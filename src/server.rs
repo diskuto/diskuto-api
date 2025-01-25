@@ -65,8 +65,14 @@ pub(crate) fn serve(command: ServeCommand) -> Result<(), anyhow::Error> {
         let mut app = App::new()
             .wrap(actix_web::middleware::Logger::default())
             .app_data(data)
-            .configure(routes)
-        ;
+            ;
+        app = app.configure(api_routes);
+        
+        // TODO: Make this configurable:
+        app = app.configure(deprecated_api_routes);
+        app = app.configure(deprecated_web_routes);
+
+        app = app.configure(statics);
 
         app = app.default_service(route().to(|| html::file_not_found("")));
 
@@ -126,6 +132,7 @@ fn open_socket(bind: &str) -> Result<TcpListener, anyhow::Error> {
     Ok(socket.into())
 }
 
+
 /// Data available for our whole application.
 /// Gets stored in a Data<AppData>
 // This is so that we have typesafe access to AppData fields, because actix
@@ -135,30 +142,89 @@ pub(crate) struct AppData {
     backend_factory: Box<dyn backend::Factory>,
 }
 
-fn routes(cfg: &mut web::ServiceConfig) {
+fn api_routes(cfg: &mut web::ServiceConfig) {
+    cfg
+        .service(
+            web::resource("/diskuto/homepage")
+            .route(get().to(rest::homepage_item_list))
+            .wrap(cors_ok_headers())
+        )
+
+        .service(
+            web::resource("/diskuto/users/{user_id}/profile")
+            .route(get().to(rest::get_profile_item))
+            .wrap(cors_ok_headers())
+        )
+        .service(
+            web::resource("/diskuto/users/{user_id}/items")
+            .route(get().to(rest::user_item_list))
+            .wrap(cors_ok_headers())
+        )
+        .service(
+            web::resource("/diskuto/users/{user_id}/feed")
+            .route(get().to(rest::feed_item_list))
+            .wrap(cors_ok_headers())
+        )
+
+        // Not really part of the standard, but useful to have:
+        .service(
+            web::resource("/diskuto/users/{user_id}/icon.png")
+            .route(get().to(non_standard::identicon_get))
+            .wrap_fn(immutable_etag)
+        )
+        .service(
+            web::resource("/diskuto/users/{userID}/items/{signature}")
+            .route(get().to(rest::get_item))
+            .route(put().to(rest::put_item))
+            .route(route().method(Method::OPTIONS).to(cors_preflight_allow))
+            .wrap(cors_ok_headers())
+            .wrap_fn(immutable_etag)
+        )
+        .service(
+            web::resource("/diskuto/users/{user_id}/items/{signature}/replies")
+            .route(get().to(rest::item_reply_list))
+            .wrap(cors_ok_headers())
+        ).service(
+            web::resource("/diskuto/users/{user_id}/items/{signature}/files/{file_name}")
+            .route(get().to(attachments::get_file))
+            .route(put().to(attachments::put_file))
+            .route(route().method(Method::HEAD).to(attachments::head_file))
+            .route(route().method(Method::OPTIONS).to(cors_preflight_allow))
+            .wrap(cors_ok_headers())
+            .wrap_fn(immutable_etag)
+        )
+    ;
+}
+
+fn deprecated_web_routes(cfg: &mut web::ServiceConfig) {
     cfg
         .route("/", get().to(html::view_homepage))
+        .route("/u/{user_id}/", get().to(html::get_user_items))
+        .route("/u/{userID}/i/{signature}/", get().to(html::show_item))
+        .route("/u/{user_id}/profile/", get().to(html::show_profile))
+        .route("/u/{user_id}/feed/", get().to(html::get_user_feed))
+    ;
+}
 
+// These were the old URL layout with FeoBlog, before Diskuto.
+fn deprecated_api_routes(cfg: &mut web::ServiceConfig) {
+    // TODO: Add some warning that these old routes are being accessed.
+    cfg
         .service(
             web::resource("/homepage/proto3")
             .route(get().to(rest::homepage_item_list))
             .wrap(cors_ok_headers())
         )
-
-        .route("/u/{user_id}/", get().to(html::get_user_items))
         .service(
             web::resource("/u/{user_id}/proto3")
             .route(get().to(rest::user_item_list))
             .wrap(cors_ok_headers())
         )
-
         .service(
             web::resource("/u/{user_id}/icon.png")
             .route(get().to(non_standard::identicon_get))
             .wrap_fn(immutable_etag)
         )
-
-        .route("/u/{userID}/i/{signature}/", get().to(html::show_item))
         .service(
             web::resource("/u/{userID}/i/{signature}/proto3")
             .route(get().to(rest::get_item))
@@ -180,18 +246,13 @@ fn routes(cfg: &mut web::ServiceConfig) {
             .wrap(cors_ok_headers())
             .wrap_fn(immutable_etag)
         )
-
-        .route("/u/{user_id}/profile/", get().to(html::show_profile))
         .service(
             web::resource("/u/{user_id}/profile/proto3")
             .route(get().to(rest::get_profile_item))
             .wrap(cors_ok_headers())
         )
-        .route("/u/{user_id}/feed/", get().to(html::get_user_feed))
         .route("/u/{user_id}/feed/proto3", get().to(rest::feed_item_list))
-
     ;
-    statics(cfg);
 }
 
 /// Trait implemented for RustEmbed types, which knows
@@ -286,8 +347,6 @@ impl <T: RustEmbed> StaticFilesResponder for T {
             // for Cow<'static, [u8]>
             .body(file.data.into_owned());
         return Ok(response)
-
-        
     }
 }
 

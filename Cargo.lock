@@ -886,6 +886,47 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "212d0f5754cb6769937f4501cc0e67f4f4483c8d2c3e1e922ee9edbe4ab4c7c0"
 
 [[package]]
+name = "diskuto-api"
+version = "0.8.0-rc1"
+dependencies = [
+ "actix-web",
+ "actix-web-codegen",
+ "anyhow",
+ "askama",
+ "askama_actix",
+ "async-trait",
+ "blocking",
+ "bs58",
+ "comrak",
+ "env_logger",
+ "futures",
+ "generic-array 0.12.4",
+ "identicon",
+ "log",
+ "logging_timer",
+ "mime_guess",
+ "multihash",
+ "protobuf",
+ "protoc-rust",
+ "r2d2",
+ "r2d2_sqlite",
+ "rusqlite",
+ "rust-base58",
+ "rust-embed",
+ "serde",
+ "sizedisplay",
+ "smallvec 0.6.14",
+ "socket2",
+ "sodiumoxide",
+ "structopt",
+ "tablestream",
+ "tempfile",
+ "time 0.2.27",
+ "walkdir",
+ "webbrowser",
+]
+
+[[package]]
 name = "encoding_rs"
 version = "0.8.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -975,47 +1016,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ca5faf057445ce5c9d4329e382b2ce7ca38550ef3b73a5348362d5f24e0c7fe3"
 dependencies = [
  "instant",
-]
-
-[[package]]
-name = "feoblog"
-version = "0.7.0-rc8"
-dependencies = [
- "actix-web",
- "actix-web-codegen",
- "anyhow",
- "askama",
- "askama_actix",
- "async-trait",
- "blocking",
- "bs58",
- "comrak",
- "env_logger",
- "futures",
- "generic-array 0.12.4",
- "identicon",
- "log",
- "logging_timer",
- "mime_guess",
- "multihash",
- "protobuf",
- "protoc-rust",
- "r2d2",
- "r2d2_sqlite",
- "rusqlite",
- "rust-base58",
- "rust-embed",
- "serde",
- "sizedisplay",
- "smallvec 0.6.14",
- "socket2",
- "sodiumoxide",
- "structopt",
- "tablestream",
- "tempfile",
- "time 0.2.27",
- "walkdir",
- "webbrowser",
 ]
 
 [[package]]

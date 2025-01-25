@@ -70,6 +70,7 @@ fn safe_type(mime_type: &mime_guess::Mime) -> bool {
         ("audio", "ogg") => true,
         
         // NO: javascript, HTML, SVG, others.
+        // TODO: Consider a content-security-policy here to allow SVG?
         _ => false,
     }
 
@@ -115,7 +116,7 @@ pub(crate) async fn put_file(
 
     if metadata.quota_exceeded {
         return Ok(
-            HttpResponse::Forbidden()
+            HttpResponse::InsufficientStorage()
             .content_type(PLAINTEXT)
             .body("Uploading this attachment would voilate the users's quota.")
         );
@@ -236,7 +237,6 @@ pub(crate) async fn head_file(
     let backend = data.backend_factory.open()?;
 
     let metadata = backend.get_attachment_meta(&user_id, &signature, &file_name)?;
-    let metadata = backend.get_attachment_meta(&user_id, &signature, &file_name)?;
 
     let metadata = match metadata {
         Some(d) => d,
@@ -252,6 +252,7 @@ pub(crate) async fn head_file(
     if metadata.exists {
         // I'd love to set a content-length here, but apparently Actix just won't let you for a HEAD?
         // See: https://github.com/actix/actix-web/issues/1439
+        // See workaround here: https://github.com/actix/examples/blob/master/forms/multipart-s3/src/main.rs#L67-L79
         let response = HttpResponse::Ok().finish();
         return Ok(response);
     }

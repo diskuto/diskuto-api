@@ -230,6 +230,7 @@ pub(crate) async fn put_item(
     }
 
     if !signature.is_valid(&user, &bytes) {
+        // TODO: return invalid request here.
         Err(format_err!("Invalid signature"))?;
     }
 
