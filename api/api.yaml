@@ -1,0 +1,303 @@
+openapi: '3.0.3'
+info:
+  title: Diskuto REST API
+  version: '1.0'
+  description: |
+    REST API endpoints for the [Diskuto] distributed social network.
+
+    Endpoints return binary [Protobuf] data. The schema for that data
+    is in [feoblog.proto].
+
+    Endpoints should provide CORS headers so that they can be queried from
+    web-based clients on any host.
+
+    For more information on `UserID` and `Signature` types, see: [crypto.md]
+
+    [Diskuto]: https://github.com/diskuto/
+    [Protobuf]: https://protobuf.dev
+    [feoblog.proto]: https://github.com/NfNitLoop/feoblog/blob/develop/protobufs/feoblog.proto
+    [crypto.md]: https://github.com/NfNitLoop/feoblog/blob/develop/docs/crypto.md
+
+servers:
+ - url: https://blog.nfnitloop.com
+   description: A server run by the author of Diskuto.
+ - url: http://localhost:8080
+   description: Common configuration for a local development server.
+
+paths:
+  /diskuto/homepage:
+    get:
+      description: |
+        Returns content that this API server would like to surface as its "Home" page.
+        
+        UIs can render this as a default view when viewing a particular server's content.
+      parameters:
+       - $ref: "#/components/parameters/before"
+       - $ref: "#/components/parameters/after"
+      responses:
+        '200':
+          content:
+            application/protobuf3: 
+              schema:
+                $ref: "#/components/schemas/ItemList"
+          description: ""
+            
+
+
+  /diskuto/users/{userID}/profile:
+    get:
+      description: Find the latest known profile for a user.
+      parameters:
+        - $ref: "#/components/parameters/userID"
+      responses:
+        '200':
+          content:
+            application/protobuf3: 
+              schema:
+                $ref: "#/components/schemas/Item"
+          description: |
+            An `Item` containing the latest known `Profile` for a user.
+
+            Also contains an HTTP header, `signature`, with a
+            signature which can be used to validate the item.
+        '404':
+          description: No profile found for this user.
+  /diskuto/users/{userID}/feed:
+    get:
+      description: |
+        List items posted by a user, and all of the users they follow.
+
+        This can be used to easily create a feed of updates for a user.
+      parameters:
+      - $ref: "#/components/parameters/userID"
+      - $ref: "#/components/parameters/before"
+      - $ref: "#/components/parameters/after"
+      responses:
+        '200':
+          content:
+            application/protobuf3: 
+              schema:
+                $ref: "#/components/schemas/ItemList"
+          description: ""
+  /diskuto/users/{userID}/items:
+    get:
+      description: |
+        List items that a user has posted. (posts, comments, profile updates, etc.)
+
+        This returns an `ItemList`, which includes
+      parameters:
+      - $ref: "#/components/parameters/userID"
+      - $ref: "#/components/parameters/before"
+      - $ref: "#/components/parameters/after"
+      responses:
+        '200':
+          content:
+            application/protobuf3: 
+              schema:
+                $ref: "#/components/schemas/ItemList"
+          description: ""
+
+  /diskuto/users/{userID}/items/{signature}:
+    parameters:
+    - $ref: "#/components/parameters/userID"
+    - $ref: "#/components/parameters/signature"
+    get:
+      description: |
+        Load a single `Item`.
+
+        Items that exist are idempotent and may never be modified. Clients are encouraged
+        to cache items as long as they like.
+        
+        This endpoint should return HTTP cache headers so that browser-based clients
+        cache results automatically.
+      responses:
+        '200':
+          description: "Ok"
+          content:
+            application/protobuf3: 
+              schema:
+                $ref: "#/components/schemas/Item"
+        '404':
+          description: Not found.
+    put:
+      description: |
+        Add an item to a user's collection.
+
+        Servers must reject items that do not have valid signatures.
+      requestBody:
+        content:
+          application/protobuf3:
+            schema:
+              $ref: "#/components/schemas/Item"
+      responses:
+        '201':
+          description: Created. The item was validated and accepted by the server.
+        '202': 
+          description: Accepted. The item was already present on this server.
+        '400':
+          description: Bad request.
+        '403':
+          description: |
+            Forbidden.
+
+            "I don't know you!" - Bobby Hill
+        '411':
+          description: Length header was missing.
+        '413':
+          description: Payload too large.
+        '507':
+          description: |
+            Insufficient storage.
+
+            The quota for this user does not allow posting this item.
+
+  /diskuto/users/{userID}/items/{signature}/replies:
+    get:
+      description: |
+        List items that are replies to this one.
+
+        These are currently only comments, but we may add more types here soon.
+      parameters:
+      - $ref: "#/components/parameters/userID"
+      - $ref: "#/components/parameters/signature"
+      - $ref: "#/components/parameters/before"
+      - $ref: "#/components/parameters/after"
+      responses:
+        '200':
+          content:
+            application/protobuf3: 
+              schema:
+                $ref: "#/components/schemas/ItemList"
+          description: ""
+  /diskuto/users/{userID}/items/{signature}/files/{fileName}:
+    parameters:
+      - $ref: "#/components/parameters/userID"
+      - $ref: "#/components/parameters/signature"
+      - $ref: "#/components/parameters/fileName"
+    get:
+      description: Fetch a file attached to an Item.
+      responses: 
+        '200':
+          description: |
+            Serves the file contents.
+
+            Servers *should* set mime-type headers for types that users may want to embed
+            into their posts.  (jpeg, png, gif, etc.)
+
+            Servers *should* take care **not** to serve files which may remotely execute code.
+            (ex: javascript, or types that embed it, like HTML or SVG.)
+    head:
+      description: |
+        Check whether a file exists before uploading it.
+
+        This is particularly useful when syncing files between servers. If a destination
+        server already has a file, you need not fetch it from a source server.
+
+        Note: Files may be stored in a content-addressable store, so you may find that a file
+        is "present" on the server immediately after creating a new Item with that attachment,
+        if the exact same file has been uploaded previously.
+      responses:
+        '200':
+          description: |
+            OK. The file exists on the server.
+        '404':
+          description: Not Found.
+    put:
+      description: |
+        Upload a file attachment.
+
+        The name must match a file attachment name declared in this `Item`.
+
+        Servers must validate that the length and hash of the uploaded file match
+        those in the `Item` before accepting the upload.
+      responses:
+        '201':
+          description: Created. The file was successfully uploaded.
+        '202': 
+          description: Accepted. (The file already existed.)
+        '400':
+          description: |
+            Bad request.
+
+            File contents didn't match those given in the `Item`.
+        '403':
+          description: Forbidden.
+        '411':
+          description: Length header was missing.
+        '413':
+          description: Payload too large.
+        '507':
+          description: |
+            Insuffient storage.
+            
+            Uploading this file would violate the user's quota on this server.
+
+
+components:
+  schemas:     
+    Item:
+      description: |
+        A protobuf `Item`.
+        
+        See: <https://github.com/NfNitLoop/feoblog/blob/develop/protobufs/feoblog.proto>
+      type: string
+      format: binary
+    ItemList:
+      description: |
+        A protobuf `ItemList`.
+
+        See: <https://github.com/NfNitLoop/feoblog/blob/develop/protobufs/feoblog.proto>
+      type: string
+      format: binary
+
+  parameters:
+    userID:
+      description: A 32-byte NaCL public key, encoded as base58.
+      in: path
+      required: true
+      name: userID
+      schema:          
+        type: string
+        example: Aci9P5BFoP27dH2pU7kVjWVaVqe7rNFnEyWeJm8ewWby
+    signature:
+      in: path
+      required: true
+      name: signature
+      description: A 64-byte NaCL signature, encoded as base58.
+      schema:
+        type: string
+        example: 52jYYkCPk1E5wJqvqjEo3K94edzwHfeugpQiRNi8A1cru1U85y8xmaYRVFj3WfwqdQiwTzDfXuEfLxW6q9bJtw1p
+    fileName:
+      in: path
+      required: true
+      name: fileName
+      description: "The name of a file listed as an attachment in this item."
+      schema:
+        type: string
+        example: "example.txt"
+    before:
+      name: before
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: |
+        A typestamp, in milliseconds since epoch. (UTC)
+
+        Limits the results to items that have a timestamp before (not including)
+        the given time. Used for pagination.
+
+    after:
+      name: after
+      in: query
+      required: false
+      schema:
+        type: integer
+      description: |
+        A typestamp, in milliseconds since epoch. (i.e.: UTC time zone)
+
+        Limits the results to items that have a timestamp after (not including)
+        the given time. Used for pagination.
+
+        **Note:** When used alone, this changes the order of items to be increasing
+        chronological order.

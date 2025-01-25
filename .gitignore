@@ -1,0 +1,10 @@
+# Ignore some stuff that might hang out in here when switching between this `docs` branch and the main one.
+/docs/
+/target/
+/src/
+/web-client/
+/.vscode/
+
+*.swp
+*.sqlite3
+.DS_Store
