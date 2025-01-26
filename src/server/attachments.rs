@@ -257,13 +257,13 @@ pub(crate) async fn head_file(
         return Ok(response);
     }
 
-    let exceeded: u64 = if metadata.quota_exceeded { 1 } else { 0 };
+    if metadata.quota_exceeded {
+        let response = HttpResponse::InsufficientStorage()
+            .body("Submitting this file would exceed this user's quota.");
+        return Ok(response)
+    }
 
-    let response = HttpResponse::NotFound()
-        // You can treat a 0 here as a "Yes, we would like this file".
-        // i.e.: It's not a plain 404. We have metadata for it, and uploading it wouldn't exceed quota.
-        .insert_header(("X-FB-Quota-Exceeded", exceeded))
-        .finish();
+    let response = HttpResponse::NotFound().finish();
 
     Ok(response)
 }
