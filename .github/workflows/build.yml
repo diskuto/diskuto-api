@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ develop, release ]
+    branches: [ main, release ]
   pull_request:
-    branches: [ develop, release ]
+    branches: [ main, release ]
   
   # Allow manual runs:
   workflow_dispatch:
@@ -14,9 +14,9 @@ on:
   workflow_call:
 
   schedule:
-    # Run once a month to alert me of bit-rot. 
+    # Run once a month to alert me of bit-rot.
     # See: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#schedule
-    # Runs on the default ("develop") branch.
+    # Runs on the default ("main") branch.
     # min h d mon DoW
     - cron: "7 5 3 * *"
 
@@ -64,8 +64,8 @@ jobs:
     - name: Save result
       uses: actions/upload-artifact@v2
       with:
-        name: "FeoBlog-${{ matrix.os }}"
+        name: "Diskuto-${{ matrix.os }}"
         path: |
-          ./target/release/feoblog
-          ./target/release/feoblog.exe
+          ./target/release/diskuto
+          ./target/release/diskuto.exe
           
