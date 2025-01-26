@@ -1,20 +1,18 @@
 syntax = "proto3";
 
-// Each FeoBlog user's "blog" is really a collection of "Items" of different
-// types. It's important to keep in mind that different servers may cache
+// Every piece of content that a user posts to a Diskuto server
+// (beside attachments) is an `Item`. API servers collect Items for 
+// known users, and serves them via REST requests.
+//
+// The REST API is documented here:
+// https://github.com/diskuto/diskuto-api/tree/main/docs/rest_api
+//
+// It's important to keep in mind that different servers may cache
 // different subsets of items.
 //
 // Servers may (and probably should) impose a size limit for Item records.
 // Servers should accept items up to 32KiB (from users who have permission to
 // post to the server).
-//
-// Clients upload items to servers by PUTing to:
-// /u/{userID}/i/{itemID}/proto3
-// The body of the PUT is the binary proto3 representation of the Item.
-// The userID is a base58-encoded NaCl public key.
-// The {itemID} is a bas58-encoded detached NaCl signature of the proto3 bytes.
-// The server must then verify the signature before storing and serving the
-// proto3 bytes and must reject invalid signatures.
 //
 message Item {
 
@@ -56,13 +54,7 @@ message Item {
     }
 }
 
-// Servers should render posts at at least two URLs:
-// 1. /u/{userID}/[?before={timestamp_ms_utc}]
-//    should render (some number of) the user's most recent posts before
-//    timestamp_ms_utc. These may be truncated.
-// 2. /u/{userID}/i/{itemID}/
-//    should render a single user post, in full.
-//    
+// A `Post` is a typical blog post.
 message Post {
     // An optional plaintext title for the post.
     // Titles should be <= 256 bytes. Servers may reject longer ones.
@@ -84,12 +76,11 @@ message Post {
 
 // A user profile, where a user can provide information about themselves.
 //
-// A server should render a human-readable version of the user profile at
-// /u/{userID}/profile.
-// This should always be the newest version of the Profile available on the
-// server.
+// The newest Profile for a user available on a server is treated as their current profile.
+//
 // If a server serves a user profile, it must allow uploads of newer signed
-// Item entries to replace it.
+// Item entries to replace it. (This allows users to advertise new servers or,
+// eventually, revoke their profile public key.)
 message Profile {
 
     // A name to display instead of your userID.
@@ -180,7 +171,8 @@ message Follow {
     string display_name = 2;
 
     // The (0-indexed) group index that this follow should be grouped under.
-    optional int32 follow_group = 3;
+    // Deprecated. see: https://github.com/diskuto/diskuto-api/issues/131
+    optional int32 follow_group = 3 [deprecated=true];
 
     // Possible future features:
     // * quota -- determine how much disk space a particular user may use.
@@ -207,13 +199,10 @@ message Signature {
     bytes bytes = 1;
 }
 
-// A list of items available on a server.
-// Exmaples:
-// GET /u/{userID}/items[?before=timestamp_ms_utc] to list a single user's items.
-// GET /u/{userID]/feed/items[?before=...] to list items in a user's feed.
+// A list of items returned by the API server.
 //
-// The list is sorted appropriately according to the request.
-// ex: ?after=... will be sorted in ascending chronological order. ?before=..., in descending.
+// The items will usually be ordered in reverse chronological order (newest first),
+// but the order may be reversed if appropriate for some queries. (ex: find posts newer than some timestamp.)
 message ItemList {
    
     repeated ItemListEntry items = 1;
@@ -225,6 +214,7 @@ message ItemList {
 
 // The unique ID of an item is its (user_id,signature)
 // This type encapsulates that, plus some additional metadata which 
+// can be used by clients to selectively fetch the full Item bytes from the server.
 message ItemListEntry {
     // user_id may be unspecified if it can be inferred from context.
     // (ex: in an ItemList which lists posts for a specific userID)
@@ -260,10 +250,16 @@ enum ItemType {
 // File attachments.
 // Certain item types may allow file attachments.
 message Attachments {
+    // REQUIRED
     repeated File file = 1;
+
+    // Future: Might add metadata for alternative/canonical sources for this file.
 }
 
 // Metadata about a file attachment.
+//
+// Specifying this on a Post allows you to upload this file as an attachment to that post.
+// 
 // All fields are REQUIRED.
 message File {
     // A  64-byte sha-512 hash of the contents of the file.
@@ -277,5 +273,6 @@ message File {
     // The name of the file.
     // The file name may not contain path separators / or \.  
     // Note: The server will use the file extension to determine the mime type with which to serve the file.
+    // However, servers should take care when serving files which can pose security risks (ex: javascript).
     string name = 3;
 }

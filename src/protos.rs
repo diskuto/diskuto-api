@@ -2,8 +2,8 @@ use std::borrow::Cow;
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
 
-mod feoblog;
-pub use feoblog::*;
+mod diskuto;
+pub use diskuto::*;
 
 /// Since proto3 does not allow specifying required fields, we must do that
 /// in our own validation here.

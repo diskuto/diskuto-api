@@ -1,7 +1,7 @@
 
 // use protoc_rust;
 
-const PROTO_FILE: &str = "protobufs/feoblog.proto";
+const PROTO_FILE: &str = "protobufs/diskuto.proto";
 
 // Build will be re-run if any of these have changed:
 const INPUTS: [&str; 3] = [

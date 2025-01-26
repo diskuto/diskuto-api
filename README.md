@@ -1,8 +1,8 @@
-FeoBlog
+Diskuto API
 =======
 
-FeoBlog is a distributed blogging/social networking system designed to protect
-you as a user. FeoBlog does this based on some core principles:
+Diskuto is a distributed blogging/social networking system designed to protect
+you as a user. Diskuto does this based on some core principles:
 
 1. Your data should not be held hostage by a single service. (ex: Facebook,
    Twitter).  
@@ -25,7 +25,7 @@ you as a user. FeoBlog does this based on some core principles:
 5. As a server administrator, you should be able to block content as required by
    law for your jurisdiction.
 
-For more information on how FeoBlog accomplishes this, see: [How Does It Work?]
+For more information on how Diskuto accomplishes this, see: [How Does It Work?]
 
 [How Does It Work?]: ./docs/how_does_it_work.md
 
@@ -44,43 +44,26 @@ For more information on how FeoBlog accomplishes this, see: [How Does It Work?]
    Ex: <https://blog.nfnitloop.com/client/#/u/A719rvsCkuN2SC5W2vz5hypDE2SpevNTUsEXrVFe9XQ7/>
 
 
-### Planned features ###
-
-See <https://github.com/NfNitLoop/feoblog/milestone/1> for a list of features planed for v1.0.
-
-
- ### Unplanned features ###
-
-There are certain features that I do not plan to implement, because I think they
-are detrimental in social networks.
-
- * Edits or deletes. Content you post is cryptographically signed and visible
-   forever, unless you revoke your userID. You can reply to your content to make
-   corrections or amendments, however.
-
-
-The Name
---------
-
-I'm not a great UI designer, so my blog will be a bit [feo]. Fe2O3 is also
-the chemical [formula] for rust, and this implementation is written in [Rust]. :p 
-
-[feo]: https://en.wiktionary.org/wiki/feo#Spanish
-[formula]: https://en.wikipedia.org/wiki/Iron(III)_oxide
-[Rust]: https://www.rust-lang.org/
-
 Getting Started
 ===============
 
 If you don't want to set up your server right away, check out the [v0.1 Demo on YouTube](https://youtu.be/LJMhiNUuCqI)!
 
-If you want to build FeoBlog from source, or modify it, see the [Development] documentation.
+If you want to build the Diskuto API from source, or modify it, see the [Development] documentation.
 
 [Development]: docs/development.md
 
-Otherwise, you can download a prebuilt release from the [GitHub Releases] page.
+Otherwise, you can download a prebuilt binary from the [GitHub Releases] page.
 
-[GitHub Releases]: https://github.com/NfNitLoop/feoblog/releases
+[GitHub Releases]: https://github.com/diskuto/diskuto-api/releases
+
+
+Old, Out-Of-Date Getting Started
+================================
+
+⚠️⚠️⚠️ These instructions are based on the old, all-in-one "FeoBlog" binary. Since the rename to Diskuto, setup has changed a bit.
+
+I'm leaving these here for now, but they need to be updated to the new system.
 
 Run the server
 --------------
@@ -123,14 +106,14 @@ A FeoBlog server doesn't contain any passwords, all it knows is a list of user I
 So, using the userID above, to add myself to the server I'd just run:
 
 ```
-feoblog user add A719rvsCkuN2SC5W2vz5hypDE2SpevNTUsEXrVFe9XQ7 --on-homepage --comment "Official FeoBlog Blog"
+diskuto user add A719rvsCkuN2SC5W2vz5hypDE2SpevNTUsEXrVFe9XQ7 --on-homepage --comment "Official FeoBlog Blog"
 ```
 
 You can do this by stopping the server with Ctrl-C first, or by running the command in a new window. (But if you stopped the server, make sure to re-start it before the next steps!)
 
-The optional `--on-homepage` argument says that posts you post to this ID should appear on the Home page of the feoblog, as well as in your individual user page.
+The optional `--on-homepage` argument says that posts you post to this ID should appear on the Home page as well as in their own user page.
 
-And the optional `--comment X` argument is just a comment to help you, the server admin, keep track of who that ID is. It's only ever shown in the output of `feoblog user list`.
+And the optional `--comment X` argument is just a comment to help you, the server admin, keep track of who that ID is. It's only ever shown in the output of `diskuto user list`.
 
 Log In
 ------
@@ -206,5 +189,4 @@ I should probably write more about these things? Tell me if you'd find them usef
     * <https://github.com/NfNitLoop/fb-rss>
   * TypeScript for Deno:
     * <https://github.com/NfNitLoop/rss2fb> 
-    * <https://github.com/NfNitLoop/feotweet>
     * <https://github.com/NfNitLoop/deno-feomasto>

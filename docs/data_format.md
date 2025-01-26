@@ -14,10 +14,10 @@ Goals
 Implementation
 --------------
 
-FeoBlog uses Protocol Buffers (v3) to define a compat encoding for blog posts
-and other data. These types are currently defined in [feoblog.proto].
+FeoBlog uses Protocol Buffers (v3) to define a compact encoding for blog posts
+and other data. These types are currently defined in [diskuto.proto].
 
-[feoblog.proto]: ../protobufs/feoblog.proto
+[diskuto.proto]: ../protobufs/diskuto.proto
 
 Users/software create these protobuf objects, sign them, and send them to one or
 more servers to host. Unlike Scuttlebutt, or typical blockchain data structures,
