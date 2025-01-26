@@ -47,7 +47,10 @@ use pagination::Paginator;
 
 pub(crate) fn serve(command: ServeCommand) -> Result<(), anyhow::Error> {
 
-    env_logger::init();
+    env_logger::init_from_env(env_logger::Env::default()
+        .default_filter_or("info,actix_server::worker=warn")
+    );
+    
     sodiumoxide::init().expect("sodiumoxide::init()");
 
     let ServeCommand{open, backend_options, mut binds} = command;

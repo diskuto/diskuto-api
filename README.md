@@ -40,8 +40,6 @@ For more information on how Diskuto accomplishes this, see: [How Does It Work?]
  * File attachments
  * Server renders a plain HTML version of content that is viewable and indexable online.  
    Ex: <https://blog.nfnitloop.com/u/A719rvsCkuN2SC5W2vz5hypDE2SpevNTUsEXrVFe9XQ7/>
- * Server also includes an in-browser client for viewing & posting.  
-   Ex: <https://blog.nfnitloop.com/client/#/u/A719rvsCkuN2SC5W2vz5hypDE2SpevNTUsEXrVFe9XQ7/>
 
 
 Getting Started

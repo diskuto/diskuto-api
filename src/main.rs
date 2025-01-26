@@ -68,7 +68,7 @@ struct ServeCommand {
 #[derive(StructOpt, Debug, Clone)]
 pub(crate) struct BackendOptions
 {
-    #[structopt(long, default_value = "feoblog.sqlite3")]
+    #[structopt(long, default_value = "diskuto.sqlite3")]
     pub sqlite_file: String,
 }
 
