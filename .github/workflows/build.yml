@@ -29,7 +29,9 @@ jobs:
     strategy:
       matrix:
         os:
-        - ubuntu-latest
+        # ubuntu-latest often uses libc much newer than Debian.
+        # Use an older version, which should be forward compatible w/ newer ones too.
+        - ubuntu-20.04
         - macos-latest
         - windows-latest
       # Don't fail fast, if we have a failure on a specific matrix type
