@@ -7,6 +7,10 @@ edition = "2018"
 description = "A distributed social network. Think Tumblr but open-source."
 keywords = ["social", "network", "distributed"]
 
+[[bin]]
+name = "diskuto"
+path = "src/main.rs"
+
 [dependencies]
 # Web:
 actix-web = "4"
