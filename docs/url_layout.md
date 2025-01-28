@@ -6,13 +6,30 @@ Documentation for the REST API has been moved into the [rest_api](./rest_api/) s
 The rest of this document makes suggestions for a common layout for web UIs for Diskuto. A common set of URL paths 
 will make it easy for users to look up content on different web UIs without having to learn an entirely new set of URLs.
 
+More importantly, since users write posts and comments using Markdown,
+having a standardized URL layout means users can reliably use relative links
+to resources. For example, a user might link to 
+`/u/A719rvsCkuN2SC5W2vz5hypDE2SpevNTUsEXrVFe9XQ7` in order to link to the
+"Official Diskuto" user.
+
+If your implementation does not want to use that URL path for whatever reason,
+it's strongly advised that it at least redirect to the appropriate path in your
+implementation.
+
+Paths
+=====
+
 
 `/`
 ---
 
-The root of the server may display any type of user interface the implementation
-desires. It may be a stream of latest posts on the server, or of a single
-user's posts, if the server is the home of a single user.
+There is no specific requirement for the root `/` path of a server, so you're welcome
+to display whatever kind of interface you find appropriate here. For example, It may be a stream
+of latest posts on the server, or of a single user's posts, if the server is the home of a single user.
+
+The diskuto-web implementation uses this URL to redirect a viewer to either to
+a non-standardized "home" view (`/home`) or to a user's "feed" if they have 
+"logged in" (set a cookie) as that user.
 
 `/u/<userID>/`
 ------------
