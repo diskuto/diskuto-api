@@ -6,7 +6,7 @@ info:
     REST API endpoints for the [Diskuto] distributed social network.
 
     Endpoints return binary [Protobuf] data. The schema for that data
-    is in [feoblog.proto].
+    is in [diskuto.proto].
 
     Endpoints should provide CORS headers so that they can be queried from
     web-based clients on any host.
@@ -15,8 +15,8 @@ info:
 
     [Diskuto]: https://github.com/diskuto/
     [Protobuf]: https://protobuf.dev
-    [feoblog.proto]: https://github.com/NfNitLoop/feoblog/blob/develop/protobufs/feoblog.proto
-    [crypto.md]: https://github.com/NfNitLoop/feoblog/blob/develop/docs/crypto.md
+    [diskuto.proto]: https://github.com/diskuto/diskuto-api/blob/main/protobufs/diskuto.proto
+    [crypto.md]: https://github.com/diskuto/diskuto-api/blob/main/docs/crypto.md
 
 servers:
  - url: https://blog.nfnitloop.com
@@ -239,14 +239,14 @@ components:
       description: |
         A protobuf `Item`.
         
-        See: <https://github.com/NfNitLoop/feoblog/blob/develop/protobufs/feoblog.proto>
+        See: <https://github.com/diskuto/diskuto-api/blob/main/protobufs/diskuto.proto>
       type: string
       format: binary
     ItemList:
       description: |
         A protobuf `ItemList`.
 
-        See: <https://github.com/NfNitLoop/feoblog/blob/develop/protobufs/feoblog.proto>
+        See: <https://github.com/diskuto/diskuto-api/blob/main/protobufs/diskuto.proto>
       type: string
       format: binary
 
@@ -294,7 +294,7 @@ components:
       schema:
         type: integer
       description: |
-        A typestamp, in milliseconds since epoch. (i.e.: UTC time zone)
+        A typestamp, in milliseconds since epoch. (UTC)
 
         Limits the results to items that have a timestamp after (not including)
         the given time. Used for pagination.
