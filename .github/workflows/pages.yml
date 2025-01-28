@@ -1,0 +1,43 @@
+name: Update GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+     - docs/rest_api/api.yaml
+     - .github/workflows/pages.yml
+  
+  # Allow manual runs:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+
+jobs:
+  github_pages:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: "Checkout docs branch"
+      run: git checkout docs
+
+    - name: Update OpenAPI YAML
+      run: |
+        git checkout ${{ github.ref }} docs/rest_api/api.yaml
+        git rm --cached docs/rest_api/api.yaml
+        mv docs/rest_api/api.yaml api/api.yaml
+
+    - name: Publish (maybe)
+      run: |
+        git status --porcelain
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "No changes found."
+          exit
+        fi
+
+        git config user.name "Update Github Pages"
+        git config user.email "nobody@example.com"
+        git commit -a -m "Updating api.yaml"
+        git push
