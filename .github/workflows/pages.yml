@@ -21,10 +21,17 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: "Checkout docs branch"
-      run: git checkout docs
+      run: |
+        set -x
+        git show-ref
+        git branch
+        git fetch origin docs --depth=1
+        git branch
+        git checkout docs
 
     - name: Update OpenAPI YAML
       run: |
+        set -x
         git checkout ${{ github.ref }} docs/rest_api/api.yaml
         git rm --cached docs/rest_api/api.yaml
         mv docs/rest_api/api.yaml api/api.yaml
