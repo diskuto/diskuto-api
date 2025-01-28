@@ -1,18 +1,16 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports, unused_variables))]
 #![deny(unknown_lints)]
 #![deny(unused_must_use)]
 
 #[cfg(test)]
 mod tests;
 
-use crate::{backend::{Factory, PruneOpts, ServerUser, UsageByUserRow, UserID, sqlite}, util::AsHex};
+use crate::{backend::{PruneOpts, ServerUser, UserID, sqlite}, util::AsHex};
 use anyhow::{Error, bail};
 use sizedisplay::SizeDisplay;
 use structopt::StructOpt;
 use tablestream::{Stream, Column, col};
 
 mod backend;
-mod markdown;
 mod protos;
 mod server;
 mod util;
@@ -175,7 +173,9 @@ struct UserRemoveCommand {
 
 impl UserRemoveCommand {
     fn main(&self) -> Result<(), Error> {
-        todo!();
+        let opts = &self.shared_options;
+        let uid = &self.user_id;
+        todo!("implement remove user {opts:?} {uid}");
     }
 }
 

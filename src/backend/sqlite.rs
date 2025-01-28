@@ -9,12 +9,11 @@
 
 mod upgraders;
 
-use std::{io::{Read, Write}, ops::DerefMut, path::Path, collections::HashMap};
+use std::{io::{Read, Write}, path::Path, collections::HashMap};
 
 use crate::{backend::UsageByUserRow, protos::Item, util::AsHex};
 use actix_web::web::Bytes;
 use backend::{FileMeta, RowCallback, SHA512};
-use futures::Stream;
 use log::{debug, warn};
 use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::{DatabaseName, NO_PARAMS, OpenFlags, named_params};
@@ -210,9 +209,6 @@ pub(crate) struct Connection
     // But also let's get an Arc copy of the pool in case we need to open more connections.
     pool: Pool,
 }
-
-trait SqliteConn: DerefMut<Target=rusqlite::Connection> {}
-impl <T: DerefMut<Target=rusqlite::Connection>> SqliteConn for T {}
 
 
 /// private methods for Conneciton

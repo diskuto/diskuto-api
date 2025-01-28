@@ -4,22 +4,21 @@
 //! And, I suppose they could also be considered part of the REST API.
 
 
-use std::io::{BufReader, BufWriter, Seek, SeekFrom};
+use std::io::{Seek, SeekFrom};
 
-use actix_web::{HttpRequest, HttpResponse, Responder, http::{header::{self, CONTENT_LENGTH}}, web::{Data, Path, Payload}};
+use actix_web::{HttpRequest, HttpResponse, web::{Data, Path, Payload}};
 use anyhow::Context;
-use futures::{AsyncSeekExt, AsyncWriteExt, StreamExt};
+use futures::{AsyncWriteExt, StreamExt};
 use mime_guess::mime;
 use sodiumoxide::crypto::hash::sha512;
 use tempfile::tempfile;
-use log::{debug};
+use log::debug;
 
 use crate::{backend::{SHA512, Signature, UserID}, server::html::not_found};
 
 use super::{AppData, Error, PLAINTEXT};
 
 pub(crate) async fn get_file(
-    req: HttpRequest,
     data: Data<AppData>,
     path: Path<(UserID, Signature, String)>,
 ) -> Result<HttpResponse, Error> {
@@ -229,7 +228,6 @@ pub(crate) async fn drain(mut payload: Payload) {
 pub(crate) async fn head_file(
     data: Data<AppData>,
     path: Path<(UserID, Signature, String)>,
-    req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
     let (user_id, signature, file_name) = path.into_inner();
     let backend = data.backend_factory.open()?;

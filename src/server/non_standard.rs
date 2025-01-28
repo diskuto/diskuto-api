@@ -3,9 +3,7 @@
 //! These are not part of the documented FeoBlog standard, but are used by this
 //! particular FeoBlog implementation to provide extra features.
 
-use actix_web::{HttpResponse, web::{Path, self}, Responder, error::{self, ErrorInternalServerError}, body::MessageBody, ResponseError};
-use futures::Future;
-use identicon::IdenticonJSOptions;
+use actix_web::{HttpResponse, web::{Path, self}, error::ErrorInternalServerError};
 
 use crate::backend::UserID;
 
@@ -36,12 +34,7 @@ fn identicon_get_sync(user_id: UserID) -> Result<Vec<u8>, ()> {
     let mut png = vec![];   
     icon.to_png(&mut png)
         // Can't actually reference the error type. Boo.
-        .map_err(|e| ())?;
+        .map_err(|_e| ())?;
 
     Ok(png)
-}
-
-/// server-absolute identicon URL. ex:  /u/__/icon.png
-pub(crate) fn identicon_url(user_id: &UserID) -> String {
-    format!("/u/{}/icon.png", user_id.to_base58())
 }

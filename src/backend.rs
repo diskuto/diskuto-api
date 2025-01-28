@@ -5,8 +5,8 @@ pub(crate) mod sqlite;
 use crate::protos::Item;
 use core::str::FromStr;
 use std::{fmt::Display, io::{Read, Seek, SeekFrom}, marker::PhantomData};
-use actix_web::{web::Bytes};
-use anyhow::{Error, Context, bail, format_err};
+use actix_web::web::Bytes;
+use anyhow::{Error, bail, format_err};
 use bs58;
 use futures::Stream;
 use serde::{Deserialize, de::{self, Visitor}};
@@ -349,6 +349,7 @@ pub struct ItemDisplayRow {
     // TODO: Make an Arc<String> to avoid heap allocs?
     // Or just make filling this in optional, since that's only used by the old HTML UI.
     /// The display name for the author of the item, if available.
+    #[allow(dead_code)]
     pub display_name: Option<String>
 }
 
@@ -375,18 +376,6 @@ impl Timestamp {
             unix_utc_ms: delta.whole_milliseconds() as i64,
         }
     }
-
-    pub fn format_with_offset(self, minutes: i16) -> String {
-        use time::{Duration, UtcOffset, OffsetDateTime};
-        use std::ops::Add;
-
-        let ms = Duration::milliseconds(self.unix_utc_ms);
-        let datetime = OffsetDateTime::unix_epoch().add(ms);
-        let offset = UtcOffset::minutes(minutes);
-        let datetime = datetime.to_offset(offset);
-
-        datetime.format("%Y-%m-%d %H:%M:%S %z")
-    }
 }
 /// A reason why a user can't post an Item or file attachment.
 pub enum QuotaDenyReason {
@@ -403,6 +392,7 @@ pub enum QuotaDenyReason {
     UnknownUser,
 
     /// We already have a profile that proves that this userID has been revoked.
+    #[allow(dead_code)]
     ProfileRevoked,
 }
 
@@ -451,11 +441,9 @@ impl SHA512 {
         file.seek(SeekFrom::Start(0))?;
         let mut buf = [0u8; 8 * 1024];
         let mut hasher = sha512::State::new();
-        let mut bytes = 0;
         loop {
             let count = file.read(&mut buf)?;
             if count == 0 { break; }
-            bytes += count;
             hasher.update(&buf[..count]);
         }
 
@@ -494,10 +482,6 @@ impl TimeSpan {
     }
 }
 
-pub struct UsageByUserOpts {
-
-}
-
 pub struct PruneOpts {
     /// If set, then we don't actually do the delete and just report on what *would* be deleted.
     pub dry_run: bool,
@@ -528,7 +512,7 @@ pub struct PruneResult {
 
 impl Display for PruneResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use tablestream::{Stream, col, Column};
+        use tablestream::{Stream, col};
 
         let title = if self.dry_run { "Dry run:" } else { "Pruned:" };
 
@@ -549,22 +533,23 @@ impl Display for PruneResult {
             name: "Attachments",
             count: self.attachments_count,
             size: SizeDisplay::bytes(self.attachments_bytes),
-        }).map_err(|e| std::fmt::Error)?;
+        }).map_err(|_| std::fmt::Error)?;
 
         stream.row(Row{
             name: "Items",
             count: self.items_count,
             size: SizeDisplay::bytes(self.items_count)
-        }).map_err(|e| std::fmt::Error)?;
+        }).map_err(|_| std::fmt::Error)?;
 
         let footer = format!("Total size: {}", SizeDisplay::bytes(self.items_bytes + self.attachments_bytes));
-        stream.footer(&footer).map_err(|e| std::fmt::Error)?;
+        stream.footer(&footer).map_err(|_| std::fmt::Error)?;
 
         write!(f, "{}", String::from_utf8_lossy(&out))
     }
 }
 
 /// Information about a single user's database usage.
+#[allow(dead_code)]
 pub struct UsageByUserRow {
     pub user_id: UserID,
     pub display_name: Option<String>,

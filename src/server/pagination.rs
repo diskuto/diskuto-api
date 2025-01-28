@@ -1,17 +1,8 @@
-//! contains the Pagination type(s).
-//! In particular, we put things here to help with pub/priv encapsulation
-//! for my own sanity. :p 
-
-use std::{
-    fmt::Write,
-    marker::PhantomData,
-    ops::{Deref, DerefMut},
-};
+use std::marker::PhantomData;
 
 use serde::Deserialize;
 
 use crate::backend::{TimeSpan, Timestamp};
-use super::{IndexPageItem};
 
 /// Query params to control pagination:
 #[derive(Deserialize, Debug)]
@@ -98,19 +89,6 @@ where
         }
     }
 
-    /// An optional message about there being nothing/no more to display.
-    pub fn message(&self) -> Option<String> {
-        if self.items.is_empty() {
-            if self.params.before.is_none() {
-                Some("Nothing to display".into())
-            } else {
-                Some("No more items to display.".into())
-            }
-        } else {
-            None
-        }
-    }
-
     /// The time before which we should query for items.
     /// Prefer time_span() if bidirectional pagination is supported.
     /// TODO: Deprecate pagination by "before" only:
@@ -140,72 +118,11 @@ where
         }
     }
 
-    fn items(&mut self) -> &Vec<T> {
-        self.flip_items();
-        return &self.items;
-    }
-
     pub fn into_items(mut self) -> Vec<T> {
         self.flip_items();
         let Self{items, ..} = self;
         items
     }
-}
-
-impl<In, E, Mapper, Filter> Paginator<IndexPageItem, In, E, Mapper, Filter>
-where 
-    Mapper: Fn(In) -> Result<IndexPageItem,E>,
-    Filter: Fn(&IndexPageItem) -> bool,
-{
-   pub fn more_items_link(&mut self, base_url: &str) -> Option<String> {
-        let span = self.time_span();
-
-        let show_link = if span.is_before() {
-            self.has_more
-        } else {
-            // We're going in the opposite direction.
-            // We can't *know* there are more older items, but we can
-            // assume that there are because we're going in this direction.
-            // i.e., we were viewing more, then hit "view previous" to come here.
-            true
-        };
-        if !show_link { return None; }
-
-        let last = match self.items().last() {
-            None => return None, // Shouldn't happen, if has_more.
-            Some(last) => last,
-        };
-
-        let mut url = format!("{}?before={}", base_url, last.item.timestamp_ms_utc);
-        if let Some(count) = self.params.count {
-            write!(url, "&count={}", count).expect("write! to a string shouldn't panic.");
-        }
-
-        Some(url)
-    }
-
-    pub fn newer_items_link(&mut self, base_url: &str) -> Option<String> {
-        let span = self.time_span();
-
-        let show_link = if span.is_before() {
-            // We can assume there are more newer items if the user has specified a ?before=...:
-            self.params.before.is_some()
-        } else {
-            self.has_more
-        };
-        if !show_link { return None; }
-
-        let first = match self.items().first() {
-            None => return None, // Shouldn't happen, if has_more.
-            Some(first) => first,
-        };
-
-        let mut url = format!("{}?after={}", base_url, first.item.timestamp_ms_utc);
-        if let Some(count) = self.params.count {
-            write!(url, "&count={}", count).expect("write! to a string shouldn't panic.");
-        }
-
-        Some(url)    }
 }
 
 /// Set lower and upper bounds for input T.

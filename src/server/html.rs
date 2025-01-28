@@ -1,6 +1,6 @@
 //! Endpoints that serve plain HTML web pages.
 
-use actix_web::{error::ErrorInternalServerError, http::StatusCode, web::{self, get, resource, route, Data, Path, Query, ServiceConfig}, HttpRequest, HttpResponse, Responder};
+use actix_web::{web::{self, get, route, ServiceConfig}, HttpResponse};
 
 use super::Error;
 

@@ -1,11 +1,11 @@
-use std::{borrow::Cow, fmt, fmt::Write, marker::PhantomData, net::TcpListener, ops::{Deref, DerefMut}};
+use std::{fmt, net::TcpListener};
 
 use askama_actix::actix_web::http::header::HeaderValue;
 use backend::FactoryBox;
-use futures::{Future, StreamExt};
+use futures::Future;
 
-use actix_web::{middleware::DefaultHeaders, HttpRequest, HttpResponse, body};
-use actix_web::http::{Method, header::{self, ContentType}};
+use actix_web::{middleware::DefaultHeaders, HttpResponse, body};
+use actix_web::http::{Method, header};
 
 use actix_web::web::{
     self,
@@ -13,27 +13,15 @@ use actix_web::web::{
     put,
     route,
     Data,
-    Path,
-    Payload,
-    Query,
 };
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse};
 
-use actix_web::{App, HttpServer, Responder};
-use anyhow::{Context, format_err};
-use log::debug;
-use logging_timer::timer;
-use rust_embed::RustEmbed;
-use serde::Deserialize;
+use actix_web::{App, HttpServer};
+use anyhow::Context;
 
-use actix_web::http::StatusCode;
-use async_trait::async_trait;
 
-use protobuf::Message;
-
-use crate::{ServeCommand, backend::{ItemDisplayRow, TimeSpan}, protos::{ItemList, ItemListEntry, ItemType, Item_oneof_item_type}};
-use crate::backend::{self, UserID, Signature, ItemRow, Timestamp};
-use crate::protos::{Item, ProtoValid};
+use crate::ServeCommand;
+use crate::backend;
 
 mod attachments;
 mod html;
@@ -41,7 +29,6 @@ mod pagination;
 mod rest;
 mod non_standard;
 
-use pagination::Paginator;
 
 pub(crate) fn serve(command: ServeCommand) -> Result<(), anyhow::Error> {
 
@@ -242,100 +229,7 @@ fn deprecated_api_routes(cfg: &mut web::ServiceConfig) {
     ;
 }
 
-/// Trait implemented for RustEmbed types, which knows
-/// how to serve a file over HTTP.
-///  * serves index.html pages when browser requests parent dir's path.
-///  * Includes file mime types (from their extensions)
-///  * Handles setting and responding to ETags. 
-#[async_trait(?Send)]
-trait StaticFilesResponder {
-    type Response: Responder;
-    async fn http_get(req: HttpRequest, path: Path<(String,)>) -> Result<Self::Response, Error>;
-}
 
-#[async_trait(?Send)]
-impl <T: RustEmbed> StaticFilesResponder for T {
-    type Response = HttpResponse;
-
-    async fn http_get(req: HttpRequest, path: Path<(String,)>) -> Result<Self::Response, Error> {
-        let (mut path,) = path.into_inner();
-        
-            
-        let mut maybe_file = T::get(path.as_str());
-        
-        // Check index.html:
-        if maybe_file.is_none() && (path.ends_with("/") || path.is_empty()) {
-            let inner = format!("{}index.html", path);
-            let mf2 = T::get(inner.as_str());
-            if mf2.is_some() {
-                path = inner;
-                maybe_file = mf2;
-            }
-        }
-
-        let file = match maybe_file {
-            Some(file) => file,
-            None => {
-                // If adding the slash would get us an index.html, do so:
-                let with_index = format!("{}/index.html", path);
-                if T::get(&with_index).is_some() {
-                    // Use a relative redirect from the inner-most path part:
-                    let part = path.split("/").last().expect("at least one element");
-                    let part = format!("{}/", part);
-                    return Ok(
-                        HttpResponse::SeeOther()
-                            .append_header(("location", part))
-                            .finish()
-                    );
-                }
-
-                // All attempts to find a file or index.html failed:
-                return Ok(
-                    HttpResponse::NotFound()
-                    .content_type(ContentType::plaintext())
-                    .body("File not found.")
-                )
-            }
-        };
-
-        // File exists.
-
-        // We're using etags to cut down on bandwidth soo, maybe 32 bytes (256bits) is overkill.
-        // I've seen some filename-based etags use as 6-8 hex characters as the hash, so 8 seems like probably enough?
-        let hash = file.metadata.sha256_hash();
-        let etag = format!(
-            r#""{:02x}{:02x}{:02x}{:02x}""#,
-            hash[0],
-            hash[1],
-            hash[2],
-            hash[3],
-        );
-        
-        let cache_validation_request = req.headers().get("if-none-match");
-        if let Some(cvr) = cache_validation_request {
-            let match_found = match cvr.to_str() {
-                Err(err) => false,
-                Ok(str_val) => str_val.contains(&etag)
-            };
-            if match_found {
-                return Ok(http_not_modified());
-            }
-        }
-
-        // Set some response headers.
-        // In particular, a mime type is required for things like JS to work.
-        let mime_type = format!("{}", mime_guess::from_path(path).first_or_octet_stream());
-        let response = HttpResponse::Ok()
-            .content_type(mime_type)
-            .append_header((header::ETAG, etag))
-
-            // TODO: This likely will result in lots of byte copying.
-            // Should implement our own MessageBody
-            // for Cow<'static, [u8]>
-            .body(file.data.into_owned());
-        return Ok(response)
-    }
-}
 
 
 fn http_not_modified() -> HttpResponse {
@@ -429,45 +323,6 @@ const MAX_ITEM_SIZE: usize = 1024 * 32;
 const PLAINTEXT: &'static str = "text/plain; charset=utf-8";
 
 
-struct ProfileFollow {
-    /// May be ""
-    display_name: String,
-    user_id: UserID,
-}
-
-/// An Item we want to display on a page.
-struct IndexPageItem {
-    row: ItemDisplayRow,
-    item: Item,
-}
-
-impl IndexPageItem {
-    fn item(&self) -> &Item { &self.item }
-    fn row(&self) -> &ItemDisplayRow { &self.row }
-
-    fn display_name(&self) -> Cow<'_, str>{
-        self.row.display_name
-            .as_ref()
-            .map(|n| n.trim())
-            .map(|n| if n.is_empty() { None } else { Some (n) })
-            .flatten()
-            .map(|n| n.into())
-            // TODO: Detect/protect against someone setting a userID that mimics a pubkey?
-            .unwrap_or_else(|| self.row.item.user.to_base58().into())
-    }
-}
-
-
-
-
-/// Represents an item of navigation on the page.
-enum Nav {
-    Text(String),
-    Link{
-        text: String,
-        href: String,
-    },
-}
 
 
 /// A type implementing ResponseError that can hold any kind of std::error::Error.
