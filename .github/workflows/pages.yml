@@ -27,7 +27,7 @@ jobs:
         git branch
         git fetch origin docs --depth=1
         git branch
-        git checkout docs
+        git checkout docs --
 
     - name: Update OpenAPI YAML
       run: |
