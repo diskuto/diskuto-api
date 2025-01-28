@@ -20,7 +20,6 @@ use actix_web::web::{
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse};
 
 use actix_web::{App, HttpServer, Responder};
-use askama_actix::Template;
 use anyhow::{Context, format_err};
 use log::debug;
 use logging_timer::timer;
@@ -37,7 +36,6 @@ use crate::backend::{self, UserID, Signature, ItemRow, Timestamp};
 use crate::protos::{Item, ProtoValid};
 
 mod attachments;
-mod client;
 mod html;
 mod pagination;
 mod rest;
@@ -71,13 +69,9 @@ pub(crate) fn serve(command: ServeCommand) -> Result<(), anyhow::Error> {
             ;
         app = app.configure(api_routes);
         
-        // TODO: Make this configurable:
+        // Soon to be deprecated.  (First: upgrade mastodon & RSS scripts)
         app = app.configure(deprecated_api_routes);
-        app = app.configure(deprecated_web_routes);
-
-        app = app.configure(statics);
-
-        app = app.default_service(route().to(|| html::file_not_found("")));
+        app = app.configure(html::routes);
 
         return app;
     };
@@ -196,16 +190,6 @@ fn api_routes(cfg: &mut web::ServiceConfig) {
             .wrap(cors_ok_headers())
             .wrap_fn(immutable_etag)
         )
-    ;
-}
-
-fn deprecated_web_routes(cfg: &mut web::ServiceConfig) {
-    cfg
-        .route("/", get().to(html::view_homepage))
-        .route("/u/{user_id}/", get().to(html::get_user_items))
-        .route("/u/{userID}/i/{signature}/", get().to(html::show_item))
-        .route("/u/{user_id}/profile/", get().to(html::show_profile))
-        .route("/u/{user_id}/feed/", get().to(html::get_user_feed))
     ;
 }
 
@@ -417,31 +401,6 @@ where S: Service<ServiceRequest, Response=ServiceResponse>
     }
 }
 
-// Note: This function signature DID NOT WORK with wrap_fn(), and produced
-// confusing error messages. If anyone can clarify to me why, I'd be very happy
-// to know.
-// See: https://twitter.com/NfNitLoop/status/1361389613672062978
-//
-// async fn immutable_etag<S>(req: ServiceRequest, service: S) 
-// -> Result<ServiceResponse, actix_web::error::Error> 
-// where for<'a> &'a mut S: Service
-// {
-//     todo!()
-// }
-
-
-// Currently, /static/ is used both by HTML and web client.
-#[derive(RustEmbed, Debug)]
-#[folder = "static/"]
-struct StaticFiles;
-
-
-fn statics(cfg: &mut web::ServiceConfig) {
-    cfg
-        .route("/static/{path:.*}", get().to(StaticFiles::http_get))
-        .route("/client/{path:.*}", get().to(client::WebClientBuild::http_get))
-    ;
-}
 
 // // CORS headers must be present for *all* responses, including 404, 500, etc.
 // // Applying it to each case individiaully may be error-prone, so here's a filter to do so for us.

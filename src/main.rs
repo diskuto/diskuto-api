@@ -33,8 +33,8 @@ fn main() -> Result<(), Error> {
 
 #[derive(StructOpt, Debug)]
 #[structopt(
-    name="feoblog",
-    about="A distributed P2P blog system.",
+    name="diskuto",
+    about="A distributed/P2P social network",
 )]
 enum Command
 {

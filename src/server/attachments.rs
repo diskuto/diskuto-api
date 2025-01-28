@@ -14,7 +14,7 @@ use sodiumoxide::crypto::hash::sha512;
 use tempfile::tempfile;
 use log::{debug};
 
-use crate::{backend::{SHA512, Signature, UserID}, server::html::file_not_found};
+use crate::{backend::{SHA512, Signature, UserID}, server::html::not_found};
 
 use super::{AppData, Error, PLAINTEXT};
 
@@ -28,9 +28,7 @@ pub(crate) async fn get_file(
 
     let contents = backend.get_contents(user_id, signature, file_name.as_str())?;
     let contents = match contents {
-        None => return Ok(
-            file_not_found("File not found").await.respond_to(&req).map_into_boxed_body()
-        ),
+        None => return not_found().await,
         Some(c) => c,
     };
 

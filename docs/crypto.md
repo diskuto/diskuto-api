@@ -1,12 +1,15 @@
-Cryptography in FeoBlog
+Cryptography in Diskuto
 =======================
 
-To minimize attack surface, the server backend of FeoBlog never stores any
-user's private key. It only ever has users' public keys. (These also serve as
-globally unique user IDs.) This can happen by:
+To minimize attack surface, Diskuto API server never stores any
+user's private key. It only ever has users' public keys. These also serve as
+globally unique user IDs, so you'll see them referred to as UserID in docs.
+Servers learn of users' public keys in various ways:
 
- * A user's ID is manually added to the server.
- * A user is "followed" by someone already on the server.
+ * A user's ID is manually added to the server via the CLI.
+ * Someone already known to the server
+   * "Follows" another user
+   * Interacts with another user's content (ex: commenting on a post).
 
 Additionally, the server does not use cookies to maintain any session state with
 clients. To post new content to the server, a user signs a piece of [data], and
@@ -14,7 +17,7 @@ clients. To post new content to the server, a user signs a piece of [data], and
 information, the server can verify that the request comes from the user, or
 someone working on their behalf (who has not modified the original content).
 
-FeoBlog uses [NaCl] signing keys, which are encoded as base58 strings in URLs.
+Diskuto uses [NaCl] signing keys, which are encoded as base58 strings in URLs.
 
 [data]: ./data_format.md 
 [NaCl]: https://en.wikipedia.org/wiki/NaCl_(software)
@@ -56,10 +59,10 @@ approach was not chosen:
    model, so they *should* allow back-filling any missing history in
    general.)
 
-2. But, more importantly, being able to create and delete subkeys (and their
+2. More importantly, being able to create and delete subkeys (and their
    content) essentially allows users to abuse subkeys to treat their blog as if
    content is able to be deleted, when that is not a use case I want to support
-   in FeoBlog.
+   in Diskuto.
 
    If a user posts some content that they receive criticism for, they should not
    be able to just revoke a subkey to remove the content. If they continue to
@@ -68,11 +71,11 @@ approach was not chosen:
 
    Users have two other options to deal with the above case: They may post a
    follow-up comment clarifying/denouncing their controversial post, or they can
-   revoke their entire UserID and start a fresh blog.
+   [revoke] their entire UserID and start fresh.
+
+[revoke]: https://github.com/diskuto/diskuto-api/issues/5
 
 Note that this does not prevent users from manually creating "sub-blogs" and
 manually performing such key management. One likely scenario I can imagine:  A
 user has a "main" blog, and in their profile they link to other blogs (user IDs)
-that they also post to. But, FeoBlog will not automate following sub-blogs
-because that could be abused precisely the way sub-keys could.
-
+that they also post to.
