@@ -141,7 +141,7 @@ message ReplyRef {
 // This also lets consumers' clients know where they can find the creator's content.
 message Server {
 
-    // A URL to a FeoBlog server.
+    // A URL to a Diskuto server.
     // Ex:
     // "https://feo.example.com"
     // "https://feo.example.com/"
@@ -164,7 +164,7 @@ message Follow {
 
     // Set a display name for a user within the context of your feed.
     //
-    // Users may change their display names in their profiles. But, unlike Twitter, FeoBlog does not have
+    // Users may change their display names in their profiles. But, unlike Twitter, Diskuto does not have
     // a globally-unique human-readable ID to fall back on to identify someone, so it can be difficult to
     // know who's who if people keep changing their names. 
     // Here you can set a stable name so you always know who's who.

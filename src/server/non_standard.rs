@@ -1,15 +1,15 @@
 //! Non-standard endpoints.
 //!
-//! These are not part of the documented FeoBlog standard, but are used by this
-//! particular FeoBlog implementation to provide extra features.
+//! These are not part of the documented standard, but are used by this
+//! particular implementation to provide extra features.
 
 use actix_web::{HttpResponse, web::{Path, self}, error::ErrorInternalServerError};
 
 use crate::backend::UserID;
 
-/// This is not really defined as part of the standard for FeoBlogs.
+/// This is not really defined as part of the standard for Diskuto.
 /// BUT, having a default user image is handy when implementing the Open Graph Protocol.
-/// (... which is itself also not a strict requirement for a FeoBlog.)
+/// (... which is itself also not a strict requirement for a Diskuto.)
 pub(crate) async fn identicon_get(path: Path<UserID>) -> Result<HttpResponse, actix_web::Error> {
     let user_id = path.into_inner();
     let result = actix_web::web::block(move || identicon_get_sync(user_id)).await?;

@@ -1,4 +1,4 @@
-//! REST endpoints for FeoBlog.
+//! REST endpoints.
 //!
 //! Note: some endpoints are in attachments.rs, since they're used by both REST & HTML views.
 

@@ -1,0 +1,9 @@
+[server]
+port = 8080
+
+[api]
+# Inside our container, we can resolve by the docker-compose service name:
+internalUrl = "http://api:8080"
+
+# Outside the container, users need to be able to access the API at:
+url = "http://localhost:9090"

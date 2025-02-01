@@ -1,0 +1,36 @@
+name: "diskuto-fullstack"
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+    ports: 
+     - "9090:80"
+    
+#services:
+  api:
+    command: ["diskuto", "serve", "--bind=0.0.0.0:8080"]
+    build:      
+      context: ./api
+      additional_contexts:
+        buildSrc: ../..
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+    # Uncomment to expose this port to your system directly:
+    # Otherwise, you can access via the nginx proxy.
+    # ports:
+    #   - "8801:8080"
+
+#services:
+  web:
+    command: ["diskuto-web", "start"]
+    build:
+      context: ./web
+    # Uncomment to expose this port to your system directly:
+    # Otherwise, you can access via the nginx proxy.
+    # ports:
+    #   - "8802:8080"
+
+    

@@ -14,7 +14,7 @@ Goals
 Implementation
 --------------
 
-FeoBlog uses Protocol Buffers (v3) to define a compact encoding for blog posts
+Diskuto uses Protocol Buffers (v3) to define a compact encoding for blog posts
 and other data. These types are currently defined in [diskuto.proto].
 
 [diskuto.proto]: ../protobufs/diskuto.proto

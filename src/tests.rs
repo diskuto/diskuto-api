@@ -88,7 +88,7 @@ fn time_duration() {
     // Seems like enough years. 😆
     assert_eq!(292471208677, max.whole_days() / 365);
 
-    // FeoBlog uses an i64 # ms since epoch, so its max is:
+    // Diskuto uses an i64 # ms since epoch, so its max is:
     let max_feo = Duration::milliseconds(i64::MAX);
     assert_eq!(292471208, max_feo.whole_days() / 365);
 }

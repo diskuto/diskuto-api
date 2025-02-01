@@ -262,47 +262,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8da52d66c7071e2e3fa2a1e5c6d088fec47b593032b254f5e980de8ea54454d6"
 
 [[package]]
-name = "askama"
-version = "0.11.2"
-source = "git+https://github.com/djc/askama?branch=main#e215a94bd2499f2bb8cb2515b0973c7d5c794c3a"
-dependencies = [
- "askama_derive",
- "askama_escape",
- "humansize",
- "num-traits",
- "percent-encoding",
-]
-
-[[package]]
-name = "askama_actix"
-version = "0.13.1"
-source = "git+https://github.com/djc/askama?branch=main#e215a94bd2499f2bb8cb2515b0973c7d5c794c3a"
-dependencies = [
- "actix-web",
- "askama",
-]
-
-[[package]]
-name = "askama_derive"
-version = "0.12.0"
-source = "git+https://github.com/djc/askama?branch=main#e215a94bd2499f2bb8cb2515b0973c7d5c794c3a"
-dependencies = [
- "mime",
- "mime_guess",
- "nom",
- "proc-macro2 1.0.44",
- "quote 1.0.23",
- "serde",
- "syn 1.0.100",
- "toml",
-]
-
-[[package]]
-name = "askama_escape"
-version = "0.10.3"
-source = "git+https://github.com/djc/askama?branch=main#e215a94bd2499f2bb8cb2515b0973c7d5c794c3a"
-
-[[package]]
 name = "async-channel"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -892,8 +851,6 @@ dependencies = [
  "actix-web",
  "actix-web-codegen",
  "anyhow",
- "askama",
- "askama_actix",
  "async-trait",
  "blocking",
  "bs58",
@@ -1282,15 +1239,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4a1e36c821dbe04574f602848a19f742f4fb3c98d40449f11bcad18d6b17421"
 
 [[package]]
-name = "humansize"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e12090e3b87a266157c30eef7ee8f430f4226feb8dd970cccea2cc67f52f70e"
-dependencies = [
- "libm",
-]
-
-[[package]]
 name = "humantime"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1500,12 +1448,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "libm"
-version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "292a948cd991e376cf75541fe5b97a1081d713c618b4f1b9500f8844e49eb565"
-
-[[package]]
 name = "libsodium-sys"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1659,12 +1601,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "minimal-lexical"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
-
-[[package]]
 name = "miniz_oxide"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1752,16 +1688,6 @@ name = "ndk-context"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "27b02d87554356db9e9a873add8782d4ea6e3e58ea071a9adb9a2e8ddb884a8b"
-
-[[package]]
-name = "nom"
-version = "7.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8903e5a29a317527874d0402f867152a3d21c908bb0b933e416c65e301d4c36"
-dependencies = [
- "memchr",
- "minimal-lexical",
-]
 
 [[package]]
 name = "ntapi"

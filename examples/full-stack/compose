@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# We use `podman-compose` to build images, because it uses `buildah`, which
+# so far seems a bit less of a PITA than BuildKit.
+# Best way to reliably use that on multiple systems is to specify the environment variable.
+# This script does that so I don't forget it every time I run `podman compose`.
+export PODMAN_COMPOSE_PROVIDER="podman-compose"
+
+export PODMAN_COMPOSE_WARNING_LOGS=false
+
+exec podman compose "$@"

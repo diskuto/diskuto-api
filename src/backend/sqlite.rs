@@ -47,14 +47,14 @@ impl backend::FactoryBuilder for FactoryBuilder {
         if !self.db_exists()? {
             bail!("\
                     Error: Database file not found.\n\
-                    You may need to run `feoblog db init` to create the a database.\
+                    You may need to run `diskuto db init` to create the a database.\
             ");
         }
 
         if self.db_needs_upgrade()? {
             bail!("\
                 Error: Database needs an upgrade.\n\
-                Run `feoblog db upgrade` to upgrade it.
+                Run `diskuto db upgrade` to upgrade it.
             ");
         }
 
@@ -226,7 +226,7 @@ impl Connection
 
         self.run("
             CREATE TABLE item(
-                -- An Item is the core data structure of FeoBlog.
+                -- An Item is the core data structure of Diskuto.
                 -- It is a BLOB of protobuf v3 bytes defining an item in a
                 -- user's collection of items
                 bytes BLOB
@@ -353,7 +353,7 @@ impl Connection
         )?;
 
         if table_count == 0 {
-            bail!("No version table found. This may not be a valid feoblog database.")
+            bail!("No version table found. This may not be a valid diskuto database.")
         }
 
         let mut stmt = self.conn.prepare(
@@ -367,7 +367,7 @@ impl Connection
         let versions: Vec<u32> = versions.take(2).collect::<rusqlite::Result<Vec<u32>>>()?;
 
         if versions.len() == 0 {
-            bail!("Found no version in the database. This may not be a valid feoblog database.");
+            bail!("Found no version in the database. This may not be a valid diskuto database.");
         }
         if versions.len() > 1 {
             bail!("Found more than one version in the database. This database may have been corrupted.");

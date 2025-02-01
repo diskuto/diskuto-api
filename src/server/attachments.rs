@@ -33,7 +33,7 @@ pub(crate) async fn get_file(
 
     let mut mime_type = mime_guess::from_path(&file_name).first_or_octet_stream();
 
-    // FeoBlog is not meant to be a general web server.
+    // Diskuto is not meant to be a general web server.
     // Plus, since the client also runs in the browser, any mime type that can run JavaScript
     // could exfiltrate private keys.
     // Javascript, obviously. But HTML and SVG(!!!) can embed JavaScript.

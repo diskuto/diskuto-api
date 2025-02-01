@@ -1,6 +1,6 @@
 use std::{fmt, net::TcpListener};
 
-use askama_actix::actix_web::http::header::HeaderValue;
+use actix_web::http::header::HeaderValue;
 use backend::FactoryBox;
 use futures::Future;
 
