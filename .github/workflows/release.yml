@@ -23,7 +23,7 @@ jobs:
 
       - name: Create Artifacts
         working-directory: ${{ steps.download.outputs.download-path}}
-        run: 
+        run: |
           set -eux
 
           TAG="${{ github.ref_name }}"
