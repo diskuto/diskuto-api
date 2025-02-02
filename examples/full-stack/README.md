@@ -35,7 +35,7 @@ Initial Setup
    `./compose run api diskuto db init`
 
    This just runs `diskuto db init` inside of the `api` container.
-   It'll will create a `diskuto.sqlite3` database in the `./data/` directory.
+   It will create a `diskuto.sqlite3` database in the `./data/` directory.
 
 5. Start services.  
    `./compose up`

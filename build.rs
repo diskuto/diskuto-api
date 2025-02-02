@@ -1,5 +1,5 @@
 
-// use protoc_rust;
+use protobuf_codegen::Customize;
 
 const PROTO_FILE: &str = "protobufs/diskuto.proto";
 
@@ -16,6 +16,10 @@ fn main() {
         .out_dir("src/protos")
         .inputs(&[PROTO_FILE])
         .include("protobufs")
+        .customize(Customize::default()
+            // We have our own protos.rs mod file, no need for a duplicate:
+            .gen_mod_rs(false)
+        )
         .run()
         .expect("protoc");
 
