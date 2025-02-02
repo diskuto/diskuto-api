@@ -1,14 +1,9 @@
-# I don't see a way to reference jobs from other workflow files, so this is
-# mostly a copy of build.yml, with extra steps to publish the results to a release tag.
 name: Release
 
 on:
   push:
     tags:
       - "v*"
-
-env:
-  CARGO_TERM_COLOR: always
 
 jobs:
   release:
@@ -24,16 +19,16 @@ jobs:
           path: ./artifacts
       
       - name: Create MacOS artifact
-        working-directory: ${{ steps.download.outputs.download-path}}/FeoBlog-macos-latest
-        run: zip -9 release.zip feoblog
+        working-directory: ${{ steps.download.outputs.download-path}}/Diskuto-macos-latest
+        run: zip -9 release.zip diskuto
 
       - name: Create Linux artifact
-        working-directory: ${{ steps.download.outputs.download-path}}/FeoBlog-ubuntu-latest
-        run: zip -9 release.zip feoblog
+        working-directory: ${{ steps.download.outputs.download-path}}/Diskuto-ubuntu-20.04
+        run: zip -9 release.zip diskuto
 
       - name: Create Windows artifact
-        working-directory: ${{ steps.download.outputs.download-path}}/FeoBlog-windows-latest
-        run: zip -9 release.zip feoblog.exe
+        working-directory: ${{ steps.download.outputs.download-path}}/Diskuto-windows-latest
+        run: zip -9 release.zip diskuto.exe
 
       # github.ref gives us something like refs/tags/v1.2.3, but we just want v1.2.3
       - name: Get tag name
@@ -56,7 +51,7 @@ jobs:
           body: |
             See [CHANGELOG.md] for release notes.
             
-            [CHANGELOG.md]: https://github.com/NfNitLoop/feoblog/blob/${{ steps.tag-name.outputs.result }}/CHANGELOG.md
+            [CHANGELOG.md]: https://github.com/diskuto/diskuto-api/blob/${{ steps.tag-name.outputs.result }}/CHANGELOG.md
           
       - name: Attach MacOS Release
         uses: actions/upload-release-asset@v1
@@ -64,8 +59,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ${{ steps.download.outputs.download-path}}/FeoBlog-macos-latest/release.zip
-          asset_name: feoblog-macos-${{ steps.tag-name.outputs.result }}.zip
+          asset_path: ${{ steps.download.outputs.download-path}}/Diskuto-macos-latest/release.zip
+          asset_name: diskuto-api-macos-${{ steps.tag-name.outputs.result }}.zip
           asset_content_type: application/zip
 
       - name: Attach Linux (Ubuntu) Release
@@ -74,8 +69,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ${{ steps.download.outputs.download-path}}/FeoBlog-ubuntu-latest/release.zip
-          asset_name: feoblog-linux-${{ steps.tag-name.outputs.result }}.zip
+          asset_path: ${{ steps.download.outputs.download-path}}/Diskuto-ubuntu-20.04/release.zip
+          asset_name: diskuto-api-linux-${{ steps.tag-name.outputs.result }}.zip
           asset_content_type: application/zip
       
       - name: Attach Windows Release
@@ -84,7 +79,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ${{ steps.download.outputs.download-path}}/FeoBlog-windows-latest/release.zip
-          asset_name: feoblog-windows-${{ steps.tag-name.outputs.result }}.zip
+          asset_path: ${{ steps.download.outputs.download-path}}/Diskuto-windows-latest/release.zip
+          asset_name: diskuto-api-windows-${{ steps.tag-name.outputs.result }}.zip
           asset_content_type: application/zip
 

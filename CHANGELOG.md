@@ -1,6 +1,48 @@
 Changelog
 =========
 
+Version 1.0.0
+=============
+
+Date: TBD
+
+ * Rename to [diskuto-api].
+
+ * Moved to a new GitHub organization: [Diskuto]
+ 
+ * UI has been rewritten and moved into its own repository as [diskuto-web].  
+   Expect most noteworthy changes to happen in this repository moving forward, since
+   the API changes much less often.
+ 
+ * New [full-stack] example for local testing.
+ 
+ * New OpenAPI schema for the REST API. See: [docs/rest_api/]
+
+Breaking API Changes
+--------------------
+
+ * The REST API has been relocated to `/diskuto/`.  
+   This makes it much easier to serve both [diskuto-api] and [diskuto-web] from one web host.
+   See: [nginx/default.conf] for an example.
+
+   Note: The old URLs are still available for backward compatibility but will soon be removed.
+
+ * REST API endpoints have had `/proto3` suffixes removed.  
+   These used to be there to distinguish between the HTTP and REST API URLs.
+
+ * Some REST API paths have been renamed to be more user-friendly.  
+   Ex: `/u/` -> `/users/`, `/i/` -> `/items/`.
+
+ * See [docs/rest_api/] for details.
+
+
+[diskuto-api]: https://github.com/diskuto/diskuto-api
+[diskuto-web]: https://github.com/diskuto/diskuto-web
+[Diskuto]: https://github.com/diskuto
+[full-stack]: ./examples/full-stack/
+[docs/rest_api/]: ./docs/rest_api/
+[nginx/default.conf]: ./examples/full-stack/nginx/default.conf
+
 Version 0.6.0
 =============
 

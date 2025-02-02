@@ -1,6 +1,6 @@
 [package]
 name = "diskuto-api"
-version = "0.8.0-rc1"
+version = "1.0.0-rc1"
 authors = ["Cody Casterline <cody.casterline@gmail.com>"]
 edition = "2018"
 
