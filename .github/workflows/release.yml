@@ -12,75 +12,50 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Download build artifacts
         id: download
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
-      
-      - name: Create MacOS artifact
-        working-directory: ${{ steps.download.outputs.download-path}}/Diskuto-macos-latest
-        run: zip -9 release.zip diskuto
 
-      - name: Create Linux artifact
-        working-directory: ${{ steps.download.outputs.download-path}}/Diskuto-ubuntu-20.04
-        run: zip -9 release.zip diskuto
+      - name: Create Artifacts
+        working-directory: ${{ steps.download.outputs.download-path}}
+        run: 
+          set -eux
 
-      - name: Create Windows artifact
-        working-directory: ${{ steps.download.outputs.download-path}}/Diskuto-windows-latest
-        run: zip -9 release.zip diskuto.exe
+          TAG="${{ github.ref_name }}"
+          
+          cd Diskuto-macos-latest
+          zip -9 "../diskuto-api-macos-${TAG}.zip" diskuto
+          cd ..
 
-      # github.ref gives us something like refs/tags/v1.2.3, but we just want v1.2.3
-      - name: Get tag name
-        id: tag-name
-        uses: actions/github-script@v3
-        with:
-          result-encoding: string
-          script: |
-            return "${{ github.ref }}".replace("refs/tags/", "")
+          cd Diskuto-ubuntu-20.04
+          zip -9 "../diskuto-api-linux-${TAG}.zip" diskuto
+          cd ..
+
+          cd Diskuto-windows-latest
+          zip -9 "../diskuto-api-windows-${TAG}.zip" diskuto.exe
+          cd ..
+
+          ls *.zip
+
 
       - name: Create the release
         id: release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # I don't know softprops, but they were recommended by GitHub here:
+        # https://github.com/actions/upload-release-asset?tab=readme-ov-file
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ steps.tag-name.outputs.result }}
-          prerelease: contains(github.ref, '-rc')
+          release_name: Release ${{ github.ref_name }}
+          prerelease: contains(github.ref_name, '-rc')
           body: |
             See [CHANGELOG.md] for release notes.
             
-            [CHANGELOG.md]: https://github.com/diskuto/diskuto-api/blob/${{ steps.tag-name.outputs.result }}/CHANGELOG.md
+            [CHANGELOG.md]: https://github.com/diskuto/diskuto-api/blob/${{ github.ref_name }}/CHANGELOG.md
+          files: |
+            ${{ steps.download.outputs.download-path}}/*.zip
           
-      - name: Attach MacOS Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ${{ steps.download.outputs.download-path}}/Diskuto-macos-latest/release.zip
-          asset_name: diskuto-api-macos-${{ steps.tag-name.outputs.result }}.zip
-          asset_content_type: application/zip
-
-      - name: Attach Linux (Ubuntu) Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ${{ steps.download.outputs.download-path}}/Diskuto-ubuntu-20.04/release.zip
-          asset_name: diskuto-api-linux-${{ steps.tag-name.outputs.result }}.zip
-          asset_content_type: application/zip
       
-      - name: Attach Windows Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ${{ steps.download.outputs.download-path}}/Diskuto-windows-latest/release.zip
-          asset_name: diskuto-api-windows-${{ steps.tag-name.outputs.result }}.zip
-          asset_content_type: application/zip
-
