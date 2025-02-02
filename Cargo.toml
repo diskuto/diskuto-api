@@ -32,13 +32,7 @@ bs58 = { version = "*", features = ["check"] }
 # crypto:
 sodiumoxide = "*"
 
-# Markdown:
-# Comrak is safe by default:
-comrak = "0.16"
-
-# Allow embedding local files. 
-rust-embed = { version = "6.4.2", features = ["compression"] }
-# ... and serving those files w/ the right mime types.
+# Used when serving file attachments:
 mime_guess = "2"
 
 
@@ -71,18 +65,7 @@ blocking = "*"
 
 tempfile = "*"
 
-tablestream = "0.1.3"
-
-### Security updates ###
-# These are not directly needed, but we need to bump up versions used by our 
-# dependencies to avoid security issues in older versions:
-smallvec = "0.6.14"
-generic-array = "0.12.4"
-
-### Dependency updates ###
-# Some dependencies need *their* dependencies versions bumped:
-# See: https://github.com/pyrossh/rust-embed/issues/206
-walkdir = "2.3.2"
+tablestream = "0.1.4"
 
 
 [dependencies.identicon]
