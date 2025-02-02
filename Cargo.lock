@@ -862,7 +862,7 @@ checksum = "212d0f5754cb6769937f4501cc0e67f4f4483c8d2c3e1e922ee9edbe4ab4c7c0"
 
 [[package]]
 name = "diskuto-api"
-version = "1.0.0-rc2"
+version = "1.0.0-rc3"
 dependencies = [
  "actix-web",
  "actix-web-codegen",
