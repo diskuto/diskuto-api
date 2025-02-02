@@ -48,8 +48,10 @@ Getting Started
 * <https://blog.nfnitloop.com/> is my personal instance of Diskuto. You can browse that to see what it looks like.
 * [Full Stack] - contains configuration files and instructions for testing out Diskuto locally.
 * If you want to build the Diskuto API from source, or modify it, see the [Development] documentation.
+* Or you can download a binary from the [releases] page.
 * See [docs/] for even more information.
 
 [Full Stack]: ./examples/full-stack/
 [Development]: docs/development.md
+[releases]: https://github.com/diskuto/diskuto-api/releases
 [docs/]: ./docs/

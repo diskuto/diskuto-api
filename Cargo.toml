@@ -4,7 +4,7 @@ version = "0.8.0-rc1"
 authors = ["Cody Casterline <cody.casterline@gmail.com>"]
 edition = "2018"
 
-description = "A distributed social network. Think Tumblr but open-source."
+description = "A distributed social network."
 keywords = ["social", "network", "distributed"]
 
 [[bin]]

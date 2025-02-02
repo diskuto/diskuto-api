@@ -27,7 +27,6 @@ Initial Setup
 2. Install [podman-compose].
 
    Note: Docker and docker-compose might work here, but I'm testing this with Podman, so YMMV.
-   TODO: Try Colima on mac to use standard Docker commands.
 
 3. Build/download all images:  
    `./compose build`
