@@ -35,7 +35,7 @@ impl ProtoValid for Item {
 
         // TODO: Validations for specific item types.
         if self.has_profile() {
-            let err = self.get_profile().get_error();
+            let err = self.profile().get_error();
             if err.is_some() {
                 return err;
             }
@@ -48,8 +48,8 @@ impl ProtoValid for Item {
 impl ProtoValid for Profile {
     fn get_error(&self) -> Option<Cow<'static, str>> {
 
-        for follow in self.get_follows() {
-            if follow.get_user().get_bytes().len() != 32 {
+        for follow in &self.follows {
+            if follow.user.bytes.len() != 32 {
                 return Some("UserID.bytes must be 32 bytes".into())
             }
         }

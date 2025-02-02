@@ -114,13 +114,13 @@ impl Upgrader for From3To4 {
                     return Ok(true) // continue
                 }
 
-                let comment = item.get_comment();
+                let comment = item.comment();
                 
                 let reply = ReplyRow {
                     from_user_id: row.user.clone(),
                     from_signature: row.signature.clone(),
-                    to_user_id: UserID::from_vec(comment.get_reply_to().get_user_id().get_bytes().into())?,
-                    to_signature: Signature::from_vec(comment.get_reply_to().get_signature().get_bytes().into())?,
+                    to_user_id: UserID::from_vec(comment.reply_to.user_id.bytes.clone())?,
+                    to_signature: Signature::from_vec(comment.reply_to.signature.bytes.clone())?,
                 };
                 reply_tos.push(reply);
 

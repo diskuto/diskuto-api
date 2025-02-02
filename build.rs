@@ -12,7 +12,7 @@ fn main() {
     for pattern in INPUTS {
         println!("cargo:rerun-if-changed={}", pattern);
     }
-    protoc_rust::Codegen::new()
+    protobuf_codegen::Codegen::new()
         .out_dir("src/protos")
         .inputs(&[PROTO_FILE])
         .include("protobufs")

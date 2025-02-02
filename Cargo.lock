@@ -880,7 +880,7 @@ dependencies = [
  "mime_guess",
  "multihash",
  "protobuf",
- "protoc-rust",
+ "protobuf-codegen",
  "r2d2",
  "r2d2_sqlite",
  "rusqlite",
@@ -2224,39 +2224,53 @@ dependencies = [
 
 [[package]]
 name = "protobuf"
-version = "2.28.0"
+version = "3.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "106dd99e98437432fed6519dedecfade6a06a73bb7b2a1e019fdd2bee5778d94"
-
-[[package]]
-name = "protobuf-codegen"
-version = "2.28.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "033460afb75cf755fcfc16dfaed20b86468082a2ea24e05ac35ab4a099a017d6"
+checksum = "a3a7c64d9bf75b1b8d981124c14c179074e8caa7dfe7b6a12e6222ddcd0c8f72"
 dependencies = [
- "protobuf",
+ "once_cell",
+ "protobuf-support",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
-name = "protoc"
-version = "2.28.0"
+name = "protobuf-codegen"
+version = "3.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0218039c514f9e14a5060742ecd50427f8ac4f85a6dc58f2ddb806e318c55ee"
+checksum = "e26b833f144769a30e04b1db0146b2aaa53fd2fd83acf10a6b5f996606c18144"
 dependencies = [
+ "anyhow",
+ "once_cell",
+ "protobuf",
+ "protobuf-parse",
+ "regex",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "protobuf-parse"
+version = "3.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "322330e133eab455718444b4e033ebfac7c6528972c784fcde28d2cc783c6257"
+dependencies = [
+ "anyhow",
+ "indexmap",
  "log",
+ "protobuf",
+ "protobuf-support",
+ "tempfile",
+ "thiserror 1.0.69",
  "which",
 ]
 
 [[package]]
-name = "protoc-rust"
-version = "2.28.0"
+name = "protobuf-support"
+version = "3.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22f8a182bb17c485f20bdc4274a8c39000a61024cfe461c799b50fec77267838"
+checksum = "b088fd20b938a875ea00843b6faf48579462630015c3788d397ad6a786663252"
 dependencies = [
- "protobuf",
- "protobuf-codegen",
- "protoc",
- "tempfile",
+ "thiserror 1.0.69",
 ]
 
 [[package]]

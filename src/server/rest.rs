@@ -6,9 +6,9 @@ use actix_web::{HttpRequest, HttpResponse, web::{Data, Path, Payload, Query}, Ht
 use anyhow::{Context, format_err};
 use futures::StreamExt;
 use logging_timer::timer;
-use protobuf::Message;
+use protobuf::{EnumOrUnknown, Message, MessageField};
 
-use crate::{backend::{ItemDisplayRow, ItemRow, Signature, Timestamp, UserID}, protos::{Item, ItemList, ItemListEntry, ItemType, Item_oneof_item_type, ProtoValid}, server::{MAX_ITEM_SIZE, PLAINTEXT}};
+use crate::{backend::{ItemDisplayRow, ItemRow, Signature, Timestamp, UserID}, protos::{Item, ItemList, ItemListEntry, ItemType, ProtoValid}, server::{MAX_ITEM_SIZE, PLAINTEXT}};
 
 use super::{AppData, Error, pagination::{Pagination, Paginator}, attachments::drain};
 
@@ -27,7 +27,7 @@ pub(crate) async fn homepage_item_list(
             Ok(item_to_entry(&item, &row.item.user, &row.item.signature))
         }, 
         |entry: &ItemListEntry| { 
-            entry.get_item_type() == ItemType::POST
+            entry.item_type == EnumOrUnknown::new(ItemType::POST)
         }
     );
     // We're only holding ItemListEntries in memory, so we can up this limit and save some round trips.
@@ -39,7 +39,7 @@ pub(crate) async fn homepage_item_list(
 
     let mut list = ItemList::new();
     list.no_more_items = !paginator.has_more;
-    list.items = protobuf::RepeatedField::from(paginator.into_items());
+    list.items = paginator.into_items();
     Ok(
         proto_ok().body(list.write_to_bytes()?)
     )
@@ -74,7 +74,7 @@ pub(crate) async fn feed_item_list(
 
     let mut list = ItemList::new();
     list.no_more_items = !paginator.has_more;
-    list.items = protobuf::RepeatedField::from(paginator.into_items());
+    list.items = paginator.into_items();
     Ok(
         proto_ok()
         .body(list.write_to_bytes()?)
@@ -109,7 +109,7 @@ pub(crate) async fn user_item_list(
 
     let mut list = ItemList::new();
     list.no_more_items = !paginator.has_more;
-    list.items = protobuf::RepeatedField::from(paginator.into_items());
+    list.items = paginator.into_items();
     Ok(
         proto_ok()
         .body(list.write_to_bytes()?)
@@ -144,7 +144,7 @@ pub(crate) async fn item_reply_list(
 
     let mut list = ItemList::new();
     list.no_more_items = !paginator.has_more;
-    list.items = protobuf::RepeatedField::from(paginator.into_items());
+    list.items = paginator.into_items();
     Ok(
         proto_ok()
         .body(list.write_to_bytes()?)
@@ -258,7 +258,7 @@ pub(crate) async fn put_item(
     let row = ItemRow{
         user: user,
         signature: signature,
-        timestamp: Timestamp{ unix_utc_ms: item.get_timestamp_ms_utc()},
+        timestamp: Timestamp{ unix_utc_ms: item.timestamp_ms_utc},
         received: Timestamp::now(),
         item_bytes: bytes,
     };
@@ -345,25 +345,26 @@ fn proto_ok() -> HttpResponseBuilder {
 
 fn item_to_entry(item: &Item, user_id: &UserID, signature: &Signature) -> ItemListEntry {
     let mut entry = ItemListEntry::new();
-    entry.set_timestamp_ms_utc(item.timestamp_ms_utc);
-    entry.set_signature({
+    entry.timestamp_ms_utc = item.timestamp_ms_utc;
+    entry.signature = MessageField::some({
         let mut sig = crate::protos::Signature::new();
-        sig.set_bytes(signature.bytes().into());
+        sig.bytes = signature.bytes().to_vec();
         sig
     });
-    entry.set_user_id({
+    entry.user_id = MessageField::some({
         let mut uid = crate::protos::UserID::new();
-        uid.set_bytes(user_id.bytes().into());
+        uid.bytes = user_id.bytes().to_vec();
         uid
     });
-    entry.set_item_type(
+    entry.item_type = EnumOrUnknown::new({
+        use crate::protos::item::Item_type::*;
         match item.item_type {
-            Some(Item_oneof_item_type::post(_)) => ItemType::POST,
-            Some(Item_oneof_item_type::profile(_)) => ItemType::PROFILE,
-            Some(Item_oneof_item_type::comment(_)) => ItemType::COMMENT,
+            Some(Post(_)) => ItemType::POST,
+            Some(Profile(_)) => ItemType::PROFILE,
+            Some(Comment(_)) => ItemType::COMMENT,
             None => ItemType::UNKNOWN,
         }
-    );
+    });
 
     entry
 }

@@ -471,11 +471,11 @@ fn update_profile(conn: &rusqlite::Savepoint, item_row: &ItemRow, item: &Item) -
         VALUES (?, ?, ?)
     ")?;
 
-    for follow in item.get_profile().get_follows() {
+    for follow in &item.profile().follows {
         add_follow.execute(params![
             item_row.user.bytes(),
-            follow.get_user().get_bytes(),
-            follow.get_display_name(),
+            follow.user.bytes,
+            follow.display_name,
         ])?;
     }
 
@@ -486,7 +486,7 @@ fn update_profile(conn: &rusqlite::Savepoint, item_row: &ItemRow, item: &Item) -
     add_profile.execute(params![
         item_row.user.bytes(),
         item_row.signature.bytes(),
-        item.get_profile().get_display_name()
+        item.profile().display_name
     ])?;
 
     Ok(())
@@ -497,12 +497,12 @@ fn save_comment_reply(conn: &rusqlite::Connection, row: &ItemRow, item: &Item) -
         return Ok(())
     }
 
-    let comment = item.get_comment();
+    let comment = item.comment();
     let reply = ReplyRow {
         from_user_id: row.user.clone(),
         from_signature: row.signature.clone(),
-        to_user_id: UserID::from_vec(comment.get_reply_to().get_user_id().get_bytes().into())?,
-        to_signature: Signature::from_vec(comment.get_reply_to().get_signature().get_bytes().into())?,
+        to_user_id: UserID::from_vec(comment.reply_to.user_id.bytes.clone())?,
+        to_signature: Signature::from_vec(comment.reply_to.signature.bytes.clone())?,
     };
 
     save_reply_rows(conn, &[reply])
@@ -1485,9 +1485,9 @@ fn get_attachment_rows(row: &ItemRow, item: &Item) -> Result<Vec<AttachmentRow>,
     let mut rows = vec![];
 
     // TODO: Eventually support attachments for Profiles (and other types?) too:
-    let post = item.get_post();
+    let post = item.post();
 
-    let attachments = post.get_attachments().get_file();
+    let attachments = &post.attachments.file;
     for attachment in attachments {
         let row = AttachmentRow {
             name: attachment.name.clone(),
