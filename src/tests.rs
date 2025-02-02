@@ -46,7 +46,7 @@ fn bs58_bytes() {
     ];
     
     let encoded = bs58::encode(&original_bytes)
-        .with_alphabet(bs58::alphabet::BITCOIN)
+        .with_alphabet(bs58::alphabet::Alphabet::BITCOIN)
         .into_string()
     ;
 

@@ -227,7 +227,7 @@ impl Display for UserID {
 }
 
 /// Bytes representing a detached NaCl signature. (64 bytes)
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Signature {
     signature: sign::Signature,
 }
@@ -240,8 +240,8 @@ impl Signature {
             bail!("Signature expected {} bytes but found {}", SIGNATURE_BYTES, bytes.len());
         }
 
-        let signature = sign::Signature::from_slice(&bytes).ok_or_else(
-            || format_err!("Failure creating nacl::Signature")
+        let signature = sign::Signature::from_bytes(&bytes).map_err(
+            |_e| format_err!("Error parsing signature from bytes.")
         )?;
         
         Ok( Signature{ signature } )
