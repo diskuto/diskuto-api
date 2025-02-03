@@ -4,7 +4,7 @@ Changelog
 Version 1.0.0
 =============
 
-Date: TBD
+Date: Feb. 3, 2025
 
  * Rename to [diskuto-api].
 
