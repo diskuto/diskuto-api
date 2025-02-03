@@ -75,7 +75,7 @@ default-features = false
 
 [dependencies.rusqlite]
 # TODO: Switch to sqlx for async sql support?
-version = "0.24"
+version = "0.33"
 features = [
     # Use a bundled, statically-linked version of sqlite. (Simplifies building on Windows)
     "bundled",
