@@ -22,7 +22,8 @@ futures = "*"
 anyhow = "*"
 
 # CLI: 
-structopt = "0.3.17"
+clap.version = "4"
+clap.features = ["derive"]
 webbrowser = "0.8.3"
 
 multihash = "0.18"

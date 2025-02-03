@@ -6,8 +6,8 @@ mod tests;
 
 use crate::{backend::{PruneOpts, ServerUser, UserID, sqlite}, util::AsHex};
 use anyhow::{Error, bail};
+use clap::{Args, Parser};
 use sizedisplay::SizeDisplay;
-use structopt::StructOpt;
 use tablestream::{Stream, Column, col};
 
 mod backend;
@@ -17,7 +17,7 @@ mod util;
 
 
 fn main() -> Result<(), Error> {
-    let command = Command::from_args();
+    let command = Command::parse();
     use Command::*;
 
     match command {
@@ -29,44 +29,44 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-#[derive(StructOpt, Debug)]
-#[structopt(
+#[derive(Parser, Debug)]
+#[clap(
     name="diskuto",
     about="A distributed/P2P social network",
 )]
 enum Command
 {
-    #[structopt(name="serve")]
     /// Start a server.
     Serve(ServeCommand),
 
     /// User administration commands
+    #[clap(subcommand)]
     User(UserCommand),
 
     /// Database administration commands
+    #[clap(subcommand)]
     Db(DbCommand),
 }
 
-#[derive(StructOpt, Debug, Clone)]
-
+#[derive(Parser, Debug, Clone)]
 struct ServeCommand {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     backend_options: BackendOptions,
 
     /// Should we open a browser window?
-    #[structopt(long)]
+    #[arg(long)]
     open: bool,
 
     /// Bind to this local address.
     /// If unspecified, will try to bind to some port on localhost.
-    #[structopt(long="bind")]
+    #[arg(long="bind")]
     binds: Vec<String>
 }
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(Parser, Debug, Clone)]
 pub(crate) struct BackendOptions
 {
-    #[structopt(long, default_value = "diskuto.sqlite3")]
+    #[arg(long, default_value = "diskuto.sqlite3")]
     pub sqlite_file: String,
 }
 
@@ -82,7 +82,7 @@ impl BackendOptions {
     }
 }
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(Parser, Debug, Clone)]
 pub(crate) enum UserCommand {
     /// List users explicitly hosted on this server.
     List(UserListCommand),
@@ -105,9 +105,9 @@ impl UserCommand {
     }
 }
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(Args, Debug, Clone)]
 struct UserListCommand {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     backend_options: BackendOptions,
 }
 
@@ -130,19 +130,19 @@ impl UserListCommand {
     }
 }
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(Parser, Debug, Clone)]
 struct UserAddCommand {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     shared_options: BackendOptions,
 
     user_id: UserID,
 
     /// Should this user's posts appear on the homepage?
-    #[structopt(long)]
+    #[arg(long)]
     on_homepage: bool,
 
     /// Notes for the server admin
-    #[structopt(long, default_value="")]
+    #[arg(long, default_value="")]
     comment: String,
 }
 
@@ -163,9 +163,9 @@ impl UserAddCommand {
 }
 
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(Parser, Debug, Clone)]
 struct UserRemoveCommand {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     shared_options: BackendOptions,
 
     user_id: UserID,
@@ -180,7 +180,7 @@ impl UserRemoveCommand {
 }
 
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(Parser, Debug, Clone)]
 pub(crate) enum DbCommand {
     /// Initialize a new database
     Init(DbInitCommand),
@@ -206,9 +206,9 @@ impl DbCommand {
     }
 }
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(Parser, Debug, Clone)]
 struct DbInitCommand {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     backend_options: BackendOptions,
 }
 
@@ -226,13 +226,13 @@ impl DbInitCommand {
     }
 }
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(Parser, Debug, Clone)]
 struct DbUpgradeCommand {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     backend_options: BackendOptions,
 
     /// Verify that you've backed up your database in case this upgrade has an error.
-    #[structopt(long="i-have-a-backup")]
+    #[arg(long="i-have-a-backup")]
     i_have_a_backup: bool,
 }
 
@@ -252,28 +252,28 @@ impl DbUpgradeCommand {
     }
 }
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(Parser, Debug, Clone)]
 struct DbPruneCommand {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     backend_options: BackendOptions,
 
     /// Only print out statistics of what would be pruned:
-    #[structopt(long)]
+    #[arg(long)]
     dry_run: bool,
 
     /// Actually do the prune and delete things:
-    #[structopt(long)]
+    #[arg(long)]
     exec: bool,
 
     // TODO
     // blocked_users: bool,
 
     /// Don't delete unused attachments.
-    #[structopt(long)]
+    #[arg(long)]
     skip_unused_attachments: bool,
 
     /// Don't delete items belonging to unfollowed users:
-    #[structopt(long)]
+    #[arg(long)]
     skip_unfollowed_items: bool,
 
 }
@@ -299,18 +299,18 @@ impl DbPruneCommand {
     }
 }
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(Parser, Debug, Clone)]
 struct DbUsageCommand {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     backend_options: BackendOptions,
 
     /// Limit output size to the top N users by size.
-    #[structopt(long, default_value = "20")]
+    #[arg(long, default_value = "20")]
     limit: usize,
 
     /// Show the userID as hexadecimal instead of base58.
     // useful if you need to make a DB query in the form of x'hexadecimal'. 
-    #[structopt(long)]
+    #[arg(long)]
     hex: bool,
 }
 
